@@ -1,0 +1,251 @@
+2025-07-10 22:08:22,177 - backend.optimizers.dld_optimizer - ERROR - Failed to load model: No module named 'numpy._core'
+2025-07-10 22:08:22,177 - backend.api.routes - ERROR - Failed to initialize optimizer: No module named 'numpy._core'
+2025-07-10 22:08:22,177 - backend.api.app - ERROR - Failed to initialize application: No module named 'numpy._core'
+2025-07-10 22:09:13,325 - backend.optimizers.dld_optimizer - ERROR - Failed to load model: No module named 'numpy._core'
+2025-07-10 22:09:13,325 - backend.api.routes - ERROR - Failed to initialize optimizer: No module named 'numpy._core'
+2025-07-10 22:09:13,325 - backend.api.app - ERROR - Failed to initialize application: No module named 'numpy._core'
+2025-07-10 22:10:44,883 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:10:44,883 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:10:44,883 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:10:44,883 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:15:35,308 - backend.optimizers.dld_optimizer - INFO - Starting DLD optimization...
+2025-07-10 22:15:36,851 - backend.optimizers.dld_optimizer - INFO - Optimization completed in 1.15 seconds
+2025-07-10 22:15:36,851 - backend.optimizers.dld_optimizer - INFO - Best separation angle: 0.3000
+2025-07-10 22:15:36,851 - backend.api.routes - INFO - Optimization completed successfully in 1.15s
+2025-07-10 22:15:53,465 - backend.optimizers.dld_optimizer - INFO - Starting DLD optimization...
+2025-07-10 22:15:54,924 - backend.optimizers.dld_optimizer - INFO - Optimization completed in 1.27 seconds
+2025-07-10 22:15:54,924 - backend.optimizers.dld_optimizer - INFO - Best separation angle: 0.3000
+2025-07-10 22:15:54,924 - backend.api.routes - INFO - Optimization completed successfully in 1.27s
+2025-07-10 22:16:03,580 - backend.optimizers.dld_optimizer - INFO - Starting DLD optimization...
+2025-07-10 22:16:04,883 - backend.optimizers.dld_optimizer - INFO - Optimization completed in 1.15 seconds
+2025-07-10 22:16:04,883 - backend.optimizers.dld_optimizer - INFO - Best separation angle: 0.3000
+2025-07-10 22:16:04,883 - backend.api.routes - INFO - Optimization completed successfully in 1.15s
+2025-07-10 22:22:39,245 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:22:40,384 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:22:40,385 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:22:40,385 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:22:40,385 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:22:40,401 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:22:40,402 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:22:40,402 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:22:40,402 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:22:40,854 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:22:40,854 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:22:40,854 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:22:40,854 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:22:58,184 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:22:58,216 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:22:58,229 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:22:59,770 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:22:59,770 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:22:59,770 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:22:59,770 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:22:59,783 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:22:59,783 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:22:59,783 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:22:59,783 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:22:59,784 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:22:59,784 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:22:59,784 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:22:59,785 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:23:07,183 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:23:07,195 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:23:07,197 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:23:08,649 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:23:08,650 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:23:08,650 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:23:08,650 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:23:08,658 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:23:08,658 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:23:08,658 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:23:08,658 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:23:08,691 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:23:08,691 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:23:08,691 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:23:08,691 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:23:12,956 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:23:12,966 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:23:12,999 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:23:14,552 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:23:14,552 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:23:14,552 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:23:14,552 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:23:14,569 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:23:14,569 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:23:14,569 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:23:14,570 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:23:14,628 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:23:14,628 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:23:14,628 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:23:14,628 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:28:48,198 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:28:48,204 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:28:48,211 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:28:49,695 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:28:49,696 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:28:49,696 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:28:49,696 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:28:49,719 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:28:49,720 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:28:49,720 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:28:49,720 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:28:49,794 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:28:49,794 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:28:49,794 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:28:49,794 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:31:16,843 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:31:16,843 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:31:16,874 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:31:18,386 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:31:18,386 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:31:18,386 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:31:18,386 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:31:18,386 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:31:18,386 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:31:18,386 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:31:18,386 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:31:18,534 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:31:18,534 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:31:18,534 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:31:18,534 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:50:34,383 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:50:34,423 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:50:34,423 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:50:35,790 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:50:35,790 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:50:35,790 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:50:35,790 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:50:35,819 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:50:35,819 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:50:35,819 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:50:35,819 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:50:35,819 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:50:35,819 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:50:35,819 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:50:35,819 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:52:30,805 - backend.optimizers.dld_optimizer - INFO - Starting DLD optimization...
+2025-07-10 22:52:32,220 - backend.optimizers.dld_optimizer - INFO - Optimization completed in 1.06 seconds
+2025-07-10 22:52:32,220 - backend.optimizers.dld_optimizer - INFO - Best separation angle: 0.3000
+2025-07-10 22:52:32,220 - backend.api.routes - INFO - Optimization completed successfully in 1.06s
+2025-07-10 22:57:24,890 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:57:24,890 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:57:24,891 - backend.api.app - INFO - Application shutting down
+2025-07-10 22:57:26,250 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:57:26,251 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:57:26,251 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:57:26,251 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:57:26,256 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:57:26,256 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:57:26,256 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:57:26,256 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 22:57:26,301 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 22:57:26,301 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 22:57:26,301 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 22:57:26,301 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 23:01:52,647 - backend.api.app - INFO - Application shutting down
+2025-07-10 23:01:52,663 - backend.api.app - INFO - Application shutting down
+2025-07-10 23:01:52,713 - backend.api.app - INFO - Application shutting down
+2025-07-10 23:01:54,049 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 23:01:54,050 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 23:01:54,050 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 23:01:54,050 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 23:01:54,068 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 23:01:54,068 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 23:01:54,068 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 23:01:54,068 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 23:01:54,090 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 23:01:54,090 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 23:01:54,091 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 23:01:54,091 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 23:03:10,666 - backend.api.app - INFO - Application shutting down
+2025-07-10 23:03:10,672 - backend.api.app - INFO - Application shutting down
+2025-07-10 23:03:10,708 - backend.api.app - INFO - Application shutting down
+2025-07-10 23:03:12,075 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 23:03:12,075 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 23:03:12,075 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 23:03:12,075 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 23:03:12,076 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 23:03:12,076 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 23:03:12,076 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 23:03:12,077 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 23:03:12,092 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 23:03:12,092 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 23:03:12,092 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 23:03:12,092 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 23:05:55,128 - backend.api.app - INFO - Application shutting down
+2025-07-10 23:05:55,128 - backend.api.app - INFO - Application shutting down
+2025-07-10 23:05:55,189 - backend.api.app - INFO - Application shutting down
+2025-07-10 23:05:56,503 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 23:05:56,503 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 23:05:56,504 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 23:05:56,504 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 23:05:56,514 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 23:05:56,514 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 23:05:56,514 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 23:05:56,514 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 23:05:56,571 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 23:05:56,571 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 23:05:56,571 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 23:05:56,571 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 23:06:17,283 - backend.optimizers.dld_optimizer - INFO - Starting DLD optimization...
+2025-07-10 23:06:18,696 - backend.optimizers.dld_optimizer - INFO - Optimization completed in 1.06 seconds
+2025-07-10 23:06:18,696 - backend.optimizers.dld_optimizer - INFO - Best separation angle: 0.3000
+2025-07-10 23:06:18,696 - backend.api.routes - INFO - Optimization completed successfully in 1.06s
+2025-07-10 23:06:29,833 - backend.api.app - INFO - Application shutting down
+2025-07-10 23:06:29,845 - backend.api.app - INFO - Application shutting down
+2025-07-10 23:06:29,868 - backend.api.app - INFO - Application shutting down
+2025-07-10 23:06:31,266 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 23:06:31,267 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 23:06:31,267 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 23:06:31,267 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 23:06:31,279 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 23:06:31,279 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 23:06:31,279 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 23:06:31,280 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 23:06:31,321 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 23:06:31,321 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 23:06:31,321 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 23:06:31,321 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 23:06:31,823 - backend.api.app - INFO - Application shutting down
+2025-07-10 23:06:31,870 - backend.api.app - INFO - Application shutting down
+2025-07-10 23:06:31,882 - backend.api.app - INFO - Application shutting down
+2025-07-10 23:06:33,240 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 23:06:33,240 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 23:06:33,240 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 23:06:33,240 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 23:06:33,259 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 23:06:33,259 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 23:06:33,259 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 23:06:33,259 - backend.api.app - INFO - Application startup completed successfully
+2025-07-10 23:06:33,299 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-10 23:06:33,299 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-10 23:06:33,299 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-10 23:06:33,299 - backend.api.app - INFO - Application startup completed successfully
+2025-07-11 11:33:24,552 - backend.optimizers.dld_optimizer - INFO - Model loaded successfully
+2025-07-11 11:33:24,552 - backend.optimizers.dld_optimizer - INFO - DLD Optimizer initialized with model: /home/mdi220/simulations/DLD_v2/dld_optimization_project/models/trained_model.joblib
+2025-07-11 11:33:24,552 - backend.api.routes - INFO - Optimizer initialized successfully
+2025-07-11 11:33:24,552 - backend.api.app - INFO - Application startup completed successfully
+2025-07-11 11:33:58,197 - backend.optimizers.dld_optimizer - INFO - Starting DLD optimization...
+2025-07-11 11:33:59,615 - backend.optimizers.dld_optimizer - INFO - Optimization completed in 1.06 seconds
+2025-07-11 11:33:59,616 - backend.optimizers.dld_optimizer - INFO - Best separation angle: 0.3000
+2025-07-11 11:33:59,616 - backend.api.routes - INFO - Optimization completed successfully in 1.06s
+2025-07-11 11:34:02,883 - backend.optimizers.dld_optimizer - INFO - Starting DLD optimization...
+2025-07-11 11:34:04,088 - backend.optimizers.dld_optimizer - INFO - Optimization completed in 1.06 seconds
+2025-07-11 11:34:04,088 - backend.optimizers.dld_optimizer - INFO - Best separation angle: 0.3000
+2025-07-11 11:34:04,088 - backend.api.routes - INFO - Optimization completed successfully in 1.06s
+2025-07-11 11:34:23,334 - backend.optimizers.dld_optimizer - INFO - Starting DLD optimization...
+2025-07-11 11:34:24,537 - backend.optimizers.dld_optimizer - INFO - Optimization completed in 1.06 seconds
+2025-07-11 11:34:24,537 - backend.optimizers.dld_optimizer - INFO - Best separation angle: 0.3000
+2025-07-11 11:34:24,537 - backend.api.routes - INFO - Optimization completed successfully in 1.06s
+2025-07-11 11:34:34,264 - backend.optimizers.dld_optimizer - INFO - Starting DLD optimization...
+2025-07-11 11:34:35,465 - backend.optimizers.dld_optimizer - INFO - Optimization completed in 1.06 seconds
+2025-07-11 11:34:35,465 - backend.optimizers.dld_optimizer - INFO - Best separation angle: 0.3000
+2025-07-11 11:34:35,465 - backend.api.routes - INFO - Optimization completed successfully in 1.06s
+2025-07-11 12:04:05,246 - backend.optimizers.dld_optimizer - INFO - Starting DLD optimization...
+2025-07-11 12:04:06,466 - backend.optimizers.dld_optimizer - INFO - Optimization completed in 1.07 seconds
+2025-07-11 12:04:06,466 - backend.optimizers.dld_optimizer - INFO - Best separation angle: 0.3000
+2025-07-11 12:04:06,466 - backend.api.routes - INFO - Optimization completed successfully in 1.07s
+2025-07-11 12:04:30,564 - backend.optimizers.dld_optimizer - INFO - Starting DLD optimization...
+2025-07-11 12:04:31,745 - backend.optimizers.dld_optimizer - INFO - Optimization completed in 1.07 seconds
+2025-07-11 12:04:31,745 - backend.optimizers.dld_optimizer - INFO - Best separation angle: 0.3100
+2025-07-11 12:04:31,746 - backend.api.routes - INFO - Optimization completed successfully in 1.07s
