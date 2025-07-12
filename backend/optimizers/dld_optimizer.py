@@ -11,6 +11,42 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+# OptimizationModel class definition to match the trained model
+class OptimizationModel:
+    def __init__(self, xgb_model, scaler, selector, feature_names):
+        self.xgb_model = xgb_model
+        self.scaler = scaler
+        self.selector = selector
+        self.feature_names = feature_names
+    
+    def predict(self, X):
+        """
+        Predict thetaP values for input features.
+        X should be a 2D array with columns [DI, P, Gh, Gv, alpha, Q]
+        """
+        # Ensure X is 2D
+        if X.ndim == 1:
+            X = X.reshape(1, -1)
+        
+        # Scale the features
+        X_scaled = self.scaler.transform(X)
+        
+        # Apply feature selection
+        X_selected = self.selector.transform(X_scaled)
+        
+        # Convert to DMatrix
+        dmatrix = xgb.DMatrix(X_selected)
+        
+        # Predict
+        predictions = self.xgb_model.predict(dmatrix)
+        
+        return predictions
+
+# Make sure the class is available in __main__ for joblib loading
+import sys
+if '__main__' not in sys.modules:
+    sys.modules['__main__'] = sys.modules[__name__]
+
 @dataclass
 class OptimizationParameters:
     """Data class for optimization parameters."""
@@ -74,9 +110,52 @@ class DLDOptimizer:
                 logger.info("Creating a simple fallback model...")
                 return self._create_fallback_model()
             
-            model = joblib.load(self.model_path)
-            logger.info("Model loaded successfully")
-            return model
+            # Try to load with custom handling for the OptimizationModel class
+            try:
+                model = joblib.load(self.model_path)
+                logger.info("Model loaded successfully")
+                
+                # Check if it's our OptimizationModel
+                if hasattr(model, 'xgb_model') and hasattr(model, 'scaler') and hasattr(model, 'selector'):
+                    logger.info("Loaded OptimizationModel with XGBoost and preprocessing")
+                    logger.info(f"Feature names: {model.feature_names}")
+                    return model
+                else:
+                    logger.warning("Loaded model is not an OptimizationModel, using fallback")
+                    return self._create_fallback_model()
+                    
+            except Exception as load_error:
+                if "Can't get attribute 'OptimizationModel'" in str(load_error):
+                    logger.info("Attempting to load model with custom unpickler...")
+                    
+                    # Use a custom approach to load the model
+                    import pickle
+                    import io
+                    
+                    # Create a custom unpickler that maps __main__.OptimizationModel to our class
+                    class CustomUnpickler(pickle.Unpickler):
+                        def find_class(self, module, name):
+                            if module == '__main__' and name == 'OptimizationModel':
+                                return OptimizationModel
+                            return super().find_class(module, name)
+                    
+                    # Load the model with custom unpickler
+                    with open(self.model_path, 'rb') as f:
+                        model = CustomUnpickler(f).load()
+                    
+                    logger.info("Model loaded successfully with custom unpickler")
+                    
+                    # Check if it's our OptimizationModel
+                    if hasattr(model, 'xgb_model') and hasattr(model, 'scaler') and hasattr(model, 'selector'):
+                        logger.info("Loaded OptimizationModel with XGBoost and preprocessing")
+                        logger.info(f"Feature names: {model.feature_names}")
+                        return model
+                    else:
+                        logger.warning("Loaded model is not an OptimizationModel, using fallback")
+                        return self._create_fallback_model()
+                else:
+                    raise load_error
+                
         except Exception as e:
             logger.error(f"Failed to load model: {e}")
             logger.info("Creating a simple fallback model...")
@@ -118,12 +197,8 @@ class DLDOptimizer:
             # Prepare the input features in the format expected by the model
             input_features = np.array([[DI, P, Gh, Gv, alpha, Q]])
             
-            # Check if the model is an OptimizationModel (has predict method)
-            if hasattr(self.model, 'predict'):
-                theta = self.model.predict(input_features)[0]
-            else:
-                # Fallback for direct model prediction
-                theta = self.model.predict(input_features)[0]
+            # Use the model's predict method (works for both OptimizationModel and fallback)
+            theta = self.model.predict(input_features)[0]
             
             return theta
         except Exception as e:
