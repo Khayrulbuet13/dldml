@@ -3,7 +3,9 @@ import optuna
 import joblib
 import time
 import logging
-from typing import Dict, List, Tuple, Optional
+import pandas as pd
+import xgboost as xgb
+from typing import Dict, List, Tuple, Optional, Any
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -47,6 +49,8 @@ class OptimizationResult:
     best_trial_number: int
     parameter_importance: Dict[str, float]
     convergence_history: List[float]
+    study_data: Dict[str, Any]  # Study data for advanced visualizations
+    trials_dataframe: Dict[str, Any]  # Trials dataframe for plotting
 
 class DLDOptimizer:
     """Main DLD optimization class using Optuna TPE sampler."""
@@ -88,8 +92,16 @@ class DLDOptimizer:
             Predicted theta value
         """
         try:
+            # Prepare the input features in the format expected by the model
             input_features = np.array([[DI, P, Gh, Gv, alpha, Q]])
-            theta = self.model.predict(input_features)[0]
+            
+            # Check if the model is an OptimizationModel (has predict method)
+            if hasattr(self.model, 'predict'):
+                theta = self.model.predict(input_features)[0]
+            else:
+                # Fallback for direct model prediction
+                theta = self.model.predict(input_features)[0]
+            
             return theta
         except Exception as e:
             logger.error(f"Prediction failed: {e}")
@@ -178,6 +190,28 @@ class DLDOptimizer:
         # Get convergence history
         convergence_history = [-value for value in study.trials_dataframe()['value'].tolist()]
         
+        # Prepare study data for advanced visualizations
+        study_data = {
+            'best_value': study.best_value,
+            'best_trial': study.best_trial.number,
+            'n_trials': len(study.trials),
+            'direction': study.direction,
+            'sampler_name': study.sampler.__class__.__name__
+        }
+        
+        # Prepare trials dataframe for plotting
+        try:
+            trials_df = study.trials_dataframe()
+            # Convert to dict for JSON serialization
+            trials_dataframe = {
+                'columns': trials_df.columns.tolist(),
+                'data': trials_df.values.tolist(),
+                'index': trials_df.index.tolist()
+            }
+        except Exception as e:
+            logger.warning(f"Could not prepare trials dataframe: {e}")
+            trials_dataframe = {'columns': [], 'data': [], 'index': []}
+        
         # Create result object
         result = OptimizationResult(
             optimal_P=best_params['P'],
@@ -190,7 +224,9 @@ class DLDOptimizer:
             n_trials=len(study.trials),
             best_trial_number=study.best_trial.number,
             parameter_importance=param_importance,
-            convergence_history=convergence_history
+            convergence_history=convergence_history,
+            study_data=study_data,
+            trials_dataframe=trials_dataframe
         )
         
         logger.info(f"Optimization completed in {optimization_time:.2f} seconds")

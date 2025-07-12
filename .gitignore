@@ -1,2 +1,38 @@
+# Python cache and bytecode
 **/__pycache__/
-*.pyc 
+*.py[cod]
+
+# Logs
+dlogs/
+logs/
+*.log
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Test/coverage
+.pytest_cache/
+.coverage
+.cache
+
+# Model artifacts
+models/*.joblib
+
+# IDE/editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS files
+.DS_Store
+Thumbs.db 

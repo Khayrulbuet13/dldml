@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, validator
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from datetime import datetime
 
 class OptimizationRequest(BaseModel):
@@ -85,6 +85,10 @@ class OptimizationResponse(BaseModel):
     convergence_history: List[float] = Field(..., description="Convergence history")
     timestamp: datetime = Field(default_factory=datetime.utcnow, description="Optimization timestamp")
     status: str = Field("success", description="Optimization status")
+    
+    # Advanced visualization data
+    study_data: Dict[str, Any] = Field(..., description="Study data for advanced visualizations")
+    trials_dataframe: Dict[str, Any] = Field(..., description="Trials dataframe for plotting")
 
 class ErrorResponse(BaseModel):
     """Error response model."""
@@ -97,4 +101,7 @@ class HealthResponse(BaseModel):
     status: str = Field(..., description="Service status")
     timestamp: datetime = Field(default_factory=datetime.utcnow, description="Health check timestamp")
     version: str = Field(..., description="API version")
-    model_loaded: bool = Field(..., description="Whether the ML model is loaded") 
+    model_loaded: bool = Field(..., description="Whether the ML model is loaded")
+    
+    class Config:
+        protected_namespaces = () 

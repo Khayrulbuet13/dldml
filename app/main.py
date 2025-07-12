@@ -3,10 +3,12 @@ import requests
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
-from typing import Dict, Any, Optional
+import optuna
 import json
+import time
 import sys
 from pathlib import Path
+from typing import Dict, Any, Optional
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
@@ -22,7 +24,6 @@ API_BASE_URL = f"http://localhost:{config.API_PORT}/api/v1"
 st.set_page_config(
     page_title="DLD Optimization Tool",
     page_icon="🔬",
-    layout="wide",
     initial_sidebar_state="expanded"
 )
 
@@ -36,28 +37,22 @@ st.markdown("""
         text-align: center;
         margin-bottom: 2rem;
     }
-    .metric-card {
-        background-color: #f0f2f6;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        border-left: 4px solid #1f77b4;
-    }
-    .success-message {
-        background-color: #d4edda;
-        color: #155724;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        border: 1px solid #c3e6cb;
-    }
-    .error-message {
-        background-color: #f8d7da;
-        color: #721c24;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        border: 1px solid #f5c6cb;
-    }
 </style>
 """, unsafe_allow_html=True)
+
+# Initialize session state
+if "study" not in st.session_state:
+    st.session_state.study = None
+if "best_params" not in st.session_state:
+    st.session_state.best_params = None
+if "best_separation" not in st.session_state:
+    st.session_state.best_separation = None
+if "optimization_time" not in st.session_state:
+    st.session_state.optimization_time = None
+if "study_data" not in st.session_state:
+    st.session_state.study_data = None
+if "trials_dataframe" not in st.session_state:
+    st.session_state.trials_dataframe = None
 
 def check_api_health() -> bool:
     """Check if the API is healthy."""
@@ -111,57 +106,307 @@ def run_optimization(parameters: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         st.error(f"Unexpected error: {str(e)}")
         return None
 
-def create_parameter_importance_chart(importance_data: Dict[str, float]):
-    """Create parameter importance chart."""
-    if not importance_data:
+def create_optuna_study_from_data(study_data: Dict[str, Any], trials_dataframe: Dict[str, Any]) -> Optional[Any]:
+    """Create an Optuna study object from the data received from the API."""
+    try:
+        # Create a real Optuna study
+        study = optuna.create_study(direction='minimize')
+        
+        # Populate the study with trials from the dataframe
+        if trials_dataframe and trials_dataframe['data']:
+            df = pd.DataFrame(trials_dataframe['data'], columns=trials_dataframe['columns'])
+            
+            # First pass: collect all parameter ranges to create consistent distributions
+            param_ranges = {}
+            for col in df.columns:
+                if col.startswith('params_'):
+                    param_name = col.replace('params_', '')
+                    values = df[col].dropna()
+                    if len(values) > 0:
+                        param_ranges[param_name] = {
+                            'min': float(values.min()),
+                            'max': float(values.max())
+                        }
+            
+            # Second pass: create trials with consistent distributions
+            for i, row in df.iterrows():
+                # Extract parameters
+                params = {}
+                for col in df.columns:
+                    if col.startswith('params_'):
+                        param_name = col.replace('params_', '')
+                        params[param_name] = row[col]
+                
+                # Extract value
+                value = row['value'] if 'value' in df.columns else 0.0
+                
+                # Create distributions for parameters using the collected ranges
+                distributions = {}
+                for param_name, param_value in params.items():
+                    if param_name in param_ranges:
+                        # Use the actual parameter range from the data
+                        param_range = param_ranges[param_name]
+                        distributions[param_name] = optuna.distributions.FloatDistribution(
+                            low=param_range['min'],
+                            high=param_range['max']
+                        )
+                    else:
+                        # Fallback: create a simple uniform distribution around the value
+                        distributions[param_name] = optuna.distributions.FloatDistribution(
+                            low=param_value * 0.9, 
+                            high=param_value * 1.1
+                        )
+                
+                # Create a trial
+                trial = optuna.trial.create_trial(
+                    params=params,
+                    distributions=distributions,
+                    value=value
+                )
+                
+                # Add trial to study
+                study.add_trial(trial)
+        
+        return study
+    except Exception as e:
+        st.error(f"Error creating study object: {e}")
         return None
-    
-    df = pd.DataFrame(list(importance_data.items()), columns=['Parameter', 'Importance'])
-    df = df.sort_values('Importance', ascending=True)
-    
-    fig = px.bar(
-        df, 
-        x='Importance', 
-        y='Parameter', 
-        orientation='h',
-        title="Parameter Importance",
-        labels={'Importance': 'Importance Score', 'Parameter': 'Parameter'}
-    )
-    
-    fig.update_layout(
-        height=400,
-        showlegend=False,
-        xaxis_title="Importance Score",
-        yaxis_title="Parameter"
-    )
-    
-    return fig
 
-def create_convergence_chart(convergence_history: list):
-    """Create convergence history chart."""
-    if not convergence_history:
-        return None
+# Function to display results
+def show_results(study, best_params, best_separation, optimization_time, study_data, trials_dataframe):
+    st.markdown("## 📊 Optimization Results")
     
-    df = pd.DataFrame({
-        'Trial': range(1, len(convergence_history) + 1),
-        'Separation Angle': convergence_history
-    })
+    # Display results in columns
+    col1, col2 = st.columns(2)
     
-    fig = px.line(
-        df,
-        x='Trial',
-        y='Separation Angle',
-        title="Optimization Convergence",
-        labels={'Separation Angle': 'Separation Angle (degrees)', 'Trial': 'Trial Number'}
+    with col1:
+        st.markdown("### 🎯 Optimal Parameters")
+        st.metric("Post Size (P)", f"{best_params['P']:.2f} μm")
+        st.metric("Horizontal Gap (Gh)", f"{best_params['Gh']:.2f} μm")
+        st.metric("Vertical Gap (Gv)", f"{best_params['Gv']:.2f} μm")
+        st.metric("Row Shift (α)", f"{best_params['alpha']:.2f}°")
+        st.metric("Flow Rate (Q)", f"{best_params['Q']:.2f} μL/min")
+    
+    with col2:
+        st.markdown("### 📈 Performance Metrics")
+        st.metric("Max Separation Angle", f"{best_separation:.4f}°")
+        st.metric("Optimization Time", f"{optimization_time:.2f}s")
+        if study and hasattr(study, 'trials'):
+            st.metric("Trials Completed", len(study.trials))
+            st.metric("Best Trial", study.best_trial.number if study.best_trial else 0)
+            st.metric("Trials/min", f"{len(study.trials)/(optimization_time/60):.1f}")
+        else:
+            st.metric("Trials Completed", "N/A")
+            st.metric("Best Trial", "N/A")
+            st.metric("Trials/min", "N/A")
+
+    # Parameter importance analysis
+    st.markdown("## 📊 Analysis")
+    
+    st.subheader("Parameter Importance:")
+    try:
+        if study and hasattr(study, 'trials') and len(study.trials) > 0:
+            param_importance = optuna.importance.get_param_importances(study)
+            importance_df = pd.DataFrame(list(param_importance.items()), columns=['Parameter', 'Importance'])
+            st.bar_chart(importance_df.set_index('Parameter'))
+        else:
+            st.write("Parameter importance not available - insufficient trial data")
+    except Exception as e:
+        st.write(f"Could not compute parameter importance: {e}")
+
+    # 2. Parameter Interaction Matrix
+    st.subheader("Parameter Interactions")
+    try:
+        if study and hasattr(study, 'trials') and len(study.trials) > 0:
+            fig = optuna.visualization.plot_parallel_coordinate(study)
+            fig.update_layout(
+                title='Parameter Interactions and Objective Values',
+                height=500
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.write("Parameter interactions plot not available - insufficient trial data")
+    except Exception as e:
+        st.error(f"Error generating parameter interactions plot: {str(e)}")
+        st.info("This might happen if there are not enough trials or if the study data is incomplete.")
+
+    # 3. Interactive Response Surface Visualization
+    st.subheader("Response Surface Analysis")
+    st.markdown("""
+    **Response Surface Analysis**: Shows the relationship between two selected parameters and separation performance.
+    - **Contour lines**: Represent performance levels
+    - **Peaks**: Optimal performance regions
+    - **Valleys**: Poor performance regions
+    - **Steep gradients**: High sensitivity to parameter changes
+    """)
+    
+    try:
+        if study and hasattr(study, 'trials') and len(study.trials) > 0:
+            # Initialize session state for parameter selection if not exists
+            if 'x_param' not in st.session_state or 'y_param' not in st.session_state:
+                try:
+                    param_importance = optuna.importance.get_param_importances(study)
+                    param_options = list(param_importance.keys())
+                    
+                    # Ensure we have at least 2 parameters
+                    if len(param_options) >= 2:
+                        top_params = sorted(param_importance, key=param_importance.get, reverse=True)[:2]
+                        st.session_state.x_param = top_params[0]
+                        st.session_state.y_param = top_params[1]
+                    elif len(param_options) == 1:
+                        st.session_state.x_param = param_options[0]
+                        st.session_state.y_param = param_options[0]  # Same parameter as fallback
+                    else:
+                        # Fallback if no parameters available
+                        param_options = ['P', 'Gh', 'Gv', 'alpha', 'Q']
+                        st.session_state.x_param = param_options[0]
+                        st.session_state.y_param = param_options[1]
+                except:
+                    # Fallback if parameter importance fails
+                    param_options = ['P', 'Gh', 'Gv', 'alpha', 'Q']
+                    st.session_state.x_param = param_options[0]
+                    st.session_state.y_param = param_options[1]
+            
+            # Get parameter importance and options
+            try:
+                param_importance = optuna.importance.get_param_importances(study)
+                param_options = list(param_importance.keys())
+            except:
+                # Fallback if parameter importance fails
+                param_options = ['P', 'Gh', 'Gv', 'alpha', 'Q']
+            
+            # Ensure we have enough parameters
+            if len(param_options) < 2:
+                # Use fallback parameters if we don't have enough
+                param_options = ['P', 'Gh', 'Gv', 'alpha', 'Q']
+            
+            # Ensure current session state values are valid
+            if st.session_state.x_param not in param_options:
+                st.session_state.x_param = param_options[0]
+            if st.session_state.y_param not in param_options:
+                st.session_state.y_param = param_options[1] if len(param_options) > 1 else param_options[0]
+            
+            # Create selection widgets with validation
+            col1, col2 = st.columns(2)
+            with col1:
+                x_param = st.selectbox(
+                    "X-axis Parameter", 
+                    param_options, 
+                    index=param_options.index(st.session_state.x_param),
+                    key="x_param_selector"
+                )
+                st.session_state.x_param = x_param
+                
+            with col2:
+                # Filter out the X parameter from Y options to prevent same selection
+                y_options = [p for p in param_options if p != x_param]
+                if len(y_options) > 0:
+                    current_y = st.session_state.y_param if st.session_state.y_param != x_param else y_options[0]
+                    y_param = st.selectbox(
+                        "Y-axis Parameter", 
+                        y_options,
+                        index=y_options.index(current_y) if current_y in y_options else 0,
+                        key="y_param_selector"
+                    )
+                    st.session_state.y_param = y_param
+                else:
+                    st.write("No other parameters available for Y-axis")
+                    return
+            
+            # Generate the contour plot
+            if x_param != y_param:
+                try:
+                    fig = optuna.visualization.plot_contour(study, params=[x_param, y_param])
+                    fig.update_layout(
+                        title=f'Response Surface: {x_param} vs {y_param}',
+                        height=500
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+                except Exception as plot_error:
+                    st.error(f"Error generating contour plot: {str(plot_error)}")
+                    st.info("Try selecting different parameters or running more optimization trials.")
+            else:
+                st.warning("Please select different parameters for X and Y axes")
+                # Show a placeholder or previous plot to prevent hanging
+                st.info("Select different parameters above to view the response surface.")
+        else:
+            st.write("Response surface analysis not available - insufficient trial data")
+            
+    except Exception as e:
+        st.error(f"Could not generate surface plot: {str(e)}")
+        st.info("This might happen if there are not enough trials or if parameter importance cannot be calculated.")
+
+    # Optimization convergence summary
+    st.subheader("Optimization Summary:")
+    if study and hasattr(study, 'best_value'):
+        st.write(f"**Best objective value found:** {study.best_value:.4f}")
+    if study and hasattr(study, 'trials'):
+        st.write(f"**Number of trials:** {len(study.trials)}")
+    st.write("**Optimization completed successfully!**")
+    
+    # Download results
+    st.markdown("## 💾 Download Results")
+    
+    # Create results summary
+    results_summary = {
+        "optimization_parameters": {
+            "DI1": st.session_state.get('DI1', 0.5), 
+            "DI2": st.session_state.get('DI2', 0.8), 
+            "R1": st.session_state.get('R1', 0.5), 
+            "R2": st.session_state.get('R2', 0.8),
+            "P_min": st.session_state.get('P_min', 5.0), 
+            "P_max": st.session_state.get('P_max', 15.0),
+            "Gh_min": st.session_state.get('Gh_min', 5.0), 
+            "Gh_max": st.session_state.get('Gh_max', 15.0),
+            "Gv_min": st.session_state.get('Gv_min', 5.0), 
+            "Gv_max": st.session_state.get('Gv_max', 15.0),
+            "alpha_min": st.session_state.get('alpha_min', 1.0), 
+            "alpha_max": st.session_state.get('alpha_max', 5.0),
+            "Q_min": st.session_state.get('Q_min', 0.5), 
+            "Q_max": st.session_state.get('Q_max', 5.0),
+            "n_trials": st.session_state.get('n_trials', 100), 
+            "n_startup_trials": st.session_state.get('n_startup_trials', 15)
+        },
+        "optimal_parameters": {
+            "P": best_params['P'],
+            "Gh": best_params['Gh'],
+            "Gv": best_params['Gv'],
+            "alpha": best_params['alpha'],
+            "Q": best_params['Q']
+        },
+        "results": {
+            "max_separation_angle": best_separation,
+            "optimization_time": optimization_time,
+            "n_trials": len(study.trials) if study and hasattr(study, 'trials') else 0,
+            "best_trial_number": study.best_trial.number if study and study.best_trial else 0
+        },
+        "parameter_importance": optuna.importance.get_param_importances(study) if study and study.trials else {},
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+    }
+    
+    # JSON download
+    st.download_button(
+        label="📄 Download Results (JSON)",
+        data=json.dumps(results_summary, indent=2),
+        file_name="dld_optimization_results.json",
+        mime="application/json"
     )
     
-    fig.update_layout(
-        height=400,
-        xaxis_title="Trial Number",
-        yaxis_title="Separation Angle (degrees)"
-    )
+    # CSV download for optimal parameters
+    optimal_params_df = pd.DataFrame([
+        {"Parameter": "Post Size (P)", "Value": best_params['P'], "Unit": "μm"},
+        {"Parameter": "Horizontal Gap (Gh)", "Value": best_params['Gh'], "Unit": "μm"},
+        {"Parameter": "Vertical Gap (Gv)", "Value": best_params['Gv'], "Unit": "μm"},
+        {"Parameter": "Row Shift Angle (α)", "Value": best_params['alpha'], "Unit": "°"},
+        {"Parameter": "Flow Rate (Q)", "Value": best_params['Q'], "Unit": "μL/min"}
+    ])
     
-    return fig
+    st.download_button(
+        label="📊 Download Optimal Parameters (CSV)",
+        data=optimal_params_df.to_csv(index=False),
+        file_name="optimal_parameters.csv",
+        mime="text/csv"
+    )
 
 def main():
     """Main application function."""
@@ -178,21 +423,17 @@ def main():
         return
     
     # Sidebar
-    st.sidebar.header("🎛️ Input Parameters")
+    st.sidebar.header("Input Parameters")
     
     # Get default parameters
     defaults = get_default_parameters()
     
     # Cell Parameters
     st.sidebar.subheader("📊 Cell Parameters")
-    DI1 = st.sidebar.number_input("Deformation Index of Cell 1 (DI1)", 
-                                 min_value=0.0, max_value=1.0, value=defaults["DI1"])
-    DI2 = st.sidebar.number_input("Deformation Index of Cell 2 (DI2)", 
-                                 min_value=0.0, max_value=1.0, value=defaults["DI2"])
-    R1 = st.sidebar.number_input("Radius of Cell 1 (R1)", 
-                                min_value=0.0, max_value=1.0, value=defaults["R1"])
-    R2 = st.sidebar.number_input("Radius of Cell 2 (R2)", 
-                                min_value=0.0, max_value=1.0, value=defaults["R2"])
+    DI1 = st.sidebar.number_input("Deformation Index of Cell 1 (DI1)", min_value=0.0, max_value=1.0, value=defaults["DI1"])
+    DI2 = st.sidebar.number_input("Deformation Index of Cell 2 (DI2)", min_value=0.0, max_value=1.0, value=defaults["DI2"])
+    R1 = st.sidebar.number_input("Radius of Cell 1 (R1)", min_value=0.0, max_value=1.0, value=defaults["R1"])
+    R2 = st.sidebar.number_input("Radius of Cell 2 (R2)", min_value=0.0, max_value=1.0, value=defaults["R2"])
     
     # DLD Parameters
     st.sidebar.subheader("🔧 DLD Parameters")
@@ -242,19 +483,26 @@ def main():
         format="%.1f"
     )
     
-    # Optimization Settings
+    # Optimization parameters
     st.sidebar.subheader("⚙️ Optimization Settings")
-    n_trials = st.sidebar.slider("Number of Trials", 
-                                min_value=10, max_value=200, value=defaults["n_trials"])
-    n_startup_trials = st.sidebar.slider("Startup Trials (Random)", 
-                                        min_value=5, max_value=30, value=defaults["n_startup_trials"])
+    n_trials = st.sidebar.slider("Number of Trials", min_value=10, max_value=200, value=defaults["n_trials"])
+    n_startup_trials = st.sidebar.slider("Startup Trials (Random)", min_value=5, max_value=30, value=defaults["n_startup_trials"])
     
-    # Optimize button
     optimize_button = st.sidebar.button("🚀 Optimize DLD Geometry", type="primary")
     
-    # Main content area
+    # Run optimization when button is pressed
     if optimize_button:
+        # Clear previous parameter selections to reset the interface
+        if 'x_param' in st.session_state:
+            del st.session_state.x_param
+        if 'y_param' in st.session_state:
+            del st.session_state.y_param
+        
         st.markdown("## 🔄 Running Optimization...")
+        
+        # Progress bar
+        progress_bar = st.progress(0)
+        status_text = st.empty()
         
         # Prepare parameters
         parameters = {
@@ -268,11 +516,11 @@ def main():
             "random_state": defaults["random_state"]
         }
         
-        # Progress bar
-        progress_bar = st.progress(0)
-        status_text = st.empty()
+        # Store parameters in session state for download
+        for key, value in parameters.items():
+            st.session_state[key] = value
         
-        # Run optimization
+        # Run optimization with progress tracking
         with st.spinner("Optimizing DLD geometry parameters..."):
             result = run_optimization(parameters)
         
@@ -280,87 +528,41 @@ def main():
             progress_bar.progress(100)
             status_text.text("✅ Optimization completed!")
             
-            st.markdown("## 📊 Optimization Results")
-            
-            # Display results in columns
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.markdown("### 🎯 Optimal Parameters")
-                st.metric("Post Size (P)", f"{result['optimal_P']:.2f} μm")
-                st.metric("Horizontal Gap (Gh)", f"{result['optimal_Gh']:.2f} μm")
-                st.metric("Vertical Gap (Gv)", f"{result['optimal_Gv']:.2f} μm")
-                st.metric("Row Shift (α)", f"{result['optimal_alpha']:.2f}°")
-                st.metric("Flow Rate (Q)", f"{result['optimal_Q']:.2f} μL/min")
-            
-            with col2:
-                st.markdown("### 📈 Performance Metrics")
-                st.metric("Max Separation Angle", f"{result['max_separation_angle']:.4f}°")
-                st.metric("Optimization Time", f"{result['optimization_time']:.2f}s")
-                st.metric("Trials Completed", result['n_trials'])
-                st.metric("Best Trial", result['best_trial_number'])
-                st.metric("Trials/min", f"{result['n_trials']/(result['optimization_time']/60):.1f}")
-            
-            # Charts
-            st.markdown("## 📊 Analysis")
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                if result.get('parameter_importance'):
-                    fig_importance = create_parameter_importance_chart(result['parameter_importance'])
-                    if fig_importance:
-                        st.plotly_chart(fig_importance, use_container_width=True)
-            
-            with col2:
-                if result.get('convergence_history'):
-                    fig_convergence = create_convergence_chart(result['convergence_history'])
-                    if fig_convergence:
-                        st.plotly_chart(fig_convergence, use_container_width=True)
-            
-            # Download results
-            st.markdown("## 💾 Download Results")
-            
-            # Create results summary
-            results_summary = {
-                "optimization_parameters": parameters,
-                "optimal_parameters": {
-                    "P": result['optimal_P'],
-                    "Gh": result['optimal_Gh'],
-                    "Gv": result['optimal_Gv'],
-                    "alpha": result['optimal_alpha'],
-                    "Q": result['optimal_Q']
-                },
-                "results": {
-                    "max_separation_angle": result['max_separation_angle'],
-                    "optimization_time": result['optimization_time'],
-                    "n_trials": result['n_trials'],
-                    "best_trial_number": result['best_trial_number']
-                },
-                "parameter_importance": result.get('parameter_importance', {}),
-                "timestamp": result.get('timestamp', '')
+            # Extract results
+            best_params = {
+                'P': result['optimal_P'],
+                'Gh': result['optimal_Gh'],
+                'Gv': result['optimal_Gv'],
+                'alpha': result['optimal_alpha'],
+                'Q': result['optimal_Q']
             }
+            best_separation = result['max_separation_angle']
+            optimization_time = result['optimization_time']
             
-            # JSON download
-            st.download_button(
-                label="📄 Download Results (JSON)",
-                data=json.dumps(results_summary, indent=2),
-                file_name="dld_optimization_results.json",
-                mime="application/json"
-            )
+            # Create study object for visualizations
+            study = create_optuna_study_from_data(result['study_data'], result['trials_dataframe'])
             
-            # CSV download for parameter importance
-            if result.get('parameter_importance'):
-                importance_df = pd.DataFrame(
-                    list(result['parameter_importance'].items()),
-                    columns=['Parameter', 'Importance']
-                )
-                st.download_button(
-                    label="📊 Download Parameter Importance (CSV)",
-                    data=importance_df.to_csv(index=False),
-                    file_name="parameter_importance.csv",
-                    mime="text/csv"
-                )
+            # Store results in session state
+            st.session_state.study = study
+            st.session_state.best_params = best_params
+            st.session_state.best_separation = best_separation
+            st.session_state.optimization_time = optimization_time
+            st.session_state.study_data = result['study_data']
+            st.session_state.trials_dataframe = result['trials_dataframe']
+            
+            # Show results
+            show_results(study, best_params, best_separation, optimization_time, result['study_data'], result['trials_dataframe'])
+    
+    # Show stored results on rerun
+    elif st.session_state.study is not None:
+        show_results(
+            st.session_state.study, 
+            st.session_state.best_params, 
+            st.session_state.best_separation, 
+            st.session_state.optimization_time,
+            st.session_state.study_data,
+            st.session_state.trials_dataframe
+        )
     
     else:
         # Welcome message
@@ -379,13 +581,20 @@ def main():
         ### 🔬 About the Optimization:
         - Uses **Optuna's TPE (Tree-structured Parzen Estimator)** sampler
         - Considers parameter correlations for efficient exploration
-        - Provides parameter importance analysis
-        - Shows convergence history for optimization monitoring
+        - Provides comprehensive parameter importance analysis
+        - Shows detailed convergence history for optimization monitoring
+        
+        ### 📊 Advanced Visualizations:
+        - **📈 Parameter Importance**: Bar chart showing which parameters most affect separation performance
+        - **📈 Optimization Progress**: Real-time progress tracking with confidence bands
+        - **🔄 Parameter Interactions**: Parallel coordinates plot revealing parameter relationships
+        - **🎯 Response Surface Analysis**: Interactive contour plot showing how two parameters affect performance
         
         ### 📊 Key Features:
         - **Real-time Progress**: Track optimization progress
         - **Parameter Validation**: Automatic validation of input parameters
-        - **Visualization**: Interactive charts for results analysis
+        - **Advanced Visualizations**: Interactive charts for comprehensive results analysis
+        - **Session State Management**: Smooth parameter switching without hanging
         - **Export Results**: Download results in JSON and CSV formats
         """)
         

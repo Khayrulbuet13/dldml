@@ -34,6 +34,9 @@ class BaseConfig:
     STREAMLIT_PORT = 8501
     STREAMLIT_HOST = "0.0.0.0"
     
+    # Development settings
+    DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
+    
     # Security
     SECRET_KEY = os.environ.get("SECRET_KEY", "your-secret-key-change-in-production")
     

@@ -104,7 +104,9 @@ async def optimize_dld(
             n_trials=result.n_trials,
             best_trial_number=result.best_trial_number,
             parameter_importance=result.parameter_importance,
-            convergence_history=result.convergence_history
+            convergence_history=result.convergence_history,
+            study_data=result.study_data,
+            trials_dataframe=result.trials_dataframe
         )
         
         logger.info(f"Optimization completed successfully in {result.optimization_time:.2f}s")
