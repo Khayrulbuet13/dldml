@@ -1,6 +1,6 @@
 # Core dependencies
 fastapi==0.104.1
-uvicorn[standard]==0.24.0
+uvicorn==0.24.0
 streamlit==1.28.1
 pydantic==2.5.0
 
@@ -8,7 +8,7 @@ pydantic==2.5.0
 optuna==3.4.0
 scikit-learn==1.3.2
 joblib==1.3.2
-numpy==1.24.3
+numpy==1.26.4
 pandas==2.1.3
 xgboost==2.0.1
 
@@ -30,6 +30,6 @@ mypy==1.7.1
 gunicorn==21.2.0
 python-multipart==0.0.6
 
-# Optional: Database (for future use)
-# sqlalchemy==2.0.23
-# alembic==1.12.1 
+# Additional dependencies
+scipy==1.13.1
+seaborn==0.13.2 

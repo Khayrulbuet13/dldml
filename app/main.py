@@ -18,7 +18,10 @@ from config.base import BaseConfig
 
 # Configuration
 config = BaseConfig()
-API_BASE_URL = f"http://localhost:{config.API_PORT}/api/v1"
+# Use environment variable for backend URL in Docker, fallback to localhost for local development
+import os
+BACKEND_URL = os.environ.get('BACKEND_URL', f"http://localhost:{config.API_PORT}")
+API_BASE_URL = f"{BACKEND_URL}/api/v1"
 
 # Page configuration
 st.set_page_config(
