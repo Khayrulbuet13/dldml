@@ -5,16 +5,59 @@ A comprehensive tool for optimizing Deterministic Lateral Displacement (DLD) geo
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.10+
-- pip (Python package installer)
-- Virtual environment (recommended)
+- Docker and Docker Compose (for Option 1)
+- Python 3.10+ and pip (for Option 2)
 
-### Installation
+## 🏃‍♂️ Running the Application
+
+The application consists of two components:
+- **Backend API** (FastAPI) - Handles optimization requests
+- **Frontend** (Streamlit) - User interface
+
+### Option 1: Docker Deployment (Recommended)
+
+The easiest way to run the application is using Docker Compose, which handles all dependencies and networking automatically.
+
+1. **Start all services with Docker Compose**
+   ```bash
+   # Start backend and frontend
+   docker-compose up -d
+   
+   # Or start with nginx proxy (production mode)
+   docker-compose --profile production up -d
+   ```
+
+2. **Access the Application**
+   - **Frontend (Main App)**: http://localhost:8501
+   - **Backend API**: http://localhost:8000
+   - **API Documentation**: http://localhost:8000/docs
+   - **With Nginx**: http://localhost (production mode)
+
+3. **Stop the services**
+   ```bash
+   docker-compose down
+   ```
+
+4. **View logs**
+   ```bash
+   # All services
+   docker-compose logs -f
+   
+   # Specific service
+   docker-compose logs -f backend
+   docker-compose logs -f frontend
+   ```
+
+### Option 2: Using the Run Script
+
+For local development with automatic service management:
+
+#### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd dld_optimization_project
+   git clone https://github.com/Khayrulbuet13/dldml
+   cd dldml
    ```
 
 2. **Create and activate virtual environment**
@@ -35,64 +78,37 @@ A comprehensive tool for optimizing Deterministic Lateral Displacement (DLD) geo
    pip install -r requirements.txt
    ```
 
-## 🏃‍♂️ Running the Application
-
-The application consists of two components:
-- **Backend API** (FastAPI) - Handles optimization requests
-- **Frontend** (Streamlit) - User interface
-
-### Option 1: Run Both Services (Recommended)
-
-1. **Start the Backend API**
-   ```bash
-   # Activate virtual environment first
-   source ~/.virtualenvs/dld/bin/activate  # or your virtual env path
-   
-   # Start the backend
-   uvicorn backend.api.app:app --host 0.0.0.0 --port 8000 --reload
-   ```
-
-2. **Start the Frontend** (in a new terminal)
-   ```bash
-   # Activate virtual environment
-   source ~/.virtualenvs/dld/bin/activate
-   
-   # Start Streamlit
-   streamlit run app/main.py --server.port 8501 --server.address 0.0.0.0
-   ```
-
-3. **Access the Application**
-   - **Frontend (Main App)**: http://localhost:8501
-   - **Backend API**: http://localhost:8000
-   - **API Documentation**: http://localhost:8000/docs
-
-### Option 2: Using the Main Script
+#### Running the Application
 
 ```bash
-# Start backend only
-python main.py backend
+# Make the script executable
+chmod +x run.sh
 
-# Start frontend only
-python main.py frontend
-
-# Start both (backend will start first)
-python main.py both
+# Run the application
+./run.sh
 ```
 
-## 🔧 Configuration
+This script will:
+- Activate the virtual environment
+- Stop any existing services
+- Start the backend API
+- Start the Streamlit frontend
+- Handle graceful shutdown on exit
 
-### Environment Variables
-The application uses the following environment variables (optional):
+**Access the Application**:
+- **Frontend (Main App)**: http://localhost:8501
+- **Backend API**: http://localhost:8000
+- **API Documentation**: http://localhost:8000/docs
 
-```bash
-export SECRET_KEY="your-secret-key-here"
-export DATABASE_URL="sqlite:///./dld_optimization.db"
-```
+### Option 3: Web Implementation
 
-### Configuration Files
-- `config/base.py` - Base configuration
-- `config/dev.py` - Development settings
-- `config/prod.py` - Production settings
+Access the application directly through the web interface:
+
+**🌐 Live Application**: https://dldml.khayrul.me/
+
+No installation or setup required - just open the link in your browser and start optimizing DLD parameters immediately.
+
+
 
 ## 📊 Using the Application
 
@@ -166,22 +182,39 @@ Content-Type: application/json
 - Ensure the backend is running on port 8000
 - Check that both services are using the same virtual environment
 - Verify no firewall blocking the connection
+- For Docker: Check if containers are running with `docker-compose ps`
 
-#### 2. "No module named 'numpy._core'" Error
+#### 2. Docker Issues
+**Problem**: Containers fail to start
+**Solution**:
+```bash
+# Check container logs
+docker-compose logs
+
+# Rebuild containers
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+
+# Check container status
+docker-compose ps
+```
+
+#### 3. "No module named 'numpy._core'" Error
 **Problem**: Version mismatch between numpy versions
 **Solution**:
 ```bash
 pip install "numpy>=1.24.0,<2.0"
 ```
 
-#### 3. Model Loading Issues
+#### 4. Model Loading Issues
 **Problem**: Scikit-learn version mismatch
 **Solution**:
 ```bash
 pip install --upgrade scikit-learn
 ```
 
-#### 4. Port Already in Use
+#### 5. Port Already in Use
 **Problem**: Port 8000 or 8501 is occupied
 **Solution**:
 ```bash
@@ -202,26 +235,43 @@ uvicorn backend.api.app:app --reload --log-level debug
 
 # Streamlit with debug
 streamlit run app/main.py --logger.level debug
+
+# Docker with debug
+docker-compose up --build
 ```
 
 ## 📁 Project Structure
 
 ```
-dld_optimization_project/
-├── app/                    # Streamlit frontend
-│   └── main.py
-├── backend/               # FastAPI backend
-│   ├── api/              # API routes and models
-│   ├── optimizers/       # Optimization algorithms
-│   └── services/         # Business logic
-├── config/               # Configuration files
-├── models/               # Trained ML models
-├── data/                 # Data files
-├── tests/                # Test files
-├── scripts/              # Utility scripts
-├── requirements.txt      # Python dependencies
-└── README.md            # This file
-```
+dldml/
+├── app/                          # Streamlit frontend
+│   └── main.py                   # Main Streamlit application
+├── backend/                      # FastAPI backend
+│   ├── api/                      # API routes and models
+│   │   ├── app.py                # FastAPI application
+│   │   ├── models.py             # Data models
+│   │   └── routes.py             # API endpoints
+│   └── optimizers/               # Optimization algorithms
+│       ├── dld_optimizer.py      # DLD optimization logic
+│       └── optimization_model.py # Optimization models
+├── config/                       # Configuration files
+├── models/                       # Trained ML models
+├── data/                         # Data files
+├── tests/                        # Test files
+├── scripts/                      # Utility scripts
+├── utils/                        # Utility functions
+├── logs/                         # Application logs
+├── Dockerfile.backend            # Backend Docker configuration
+├── Dockerfile.frontend           # Frontend Docker configuration
+├── docker-compose.yml            # Docker Compose configuration
+├── nginx.conf                    # Nginx reverse proxy configuration
+├── run.sh                        # Local development script
+├── start_backend.py              # Backend startup script
+├── main.py                       # Main application entry point
+├── setup.py                      # Package setup
+├── requirements.txt              # Python dependencies
+└── README.md                     # This file
+```   
 
 ## 🧪 Testing
 
@@ -232,17 +282,15 @@ pytest tests/
 
 ## 📈 Performance
 
-### Optimization Parameters
-- **Default trials**: 100
-- **Startup trials**: 15
-- **Timeout**: 5 minutes
-- **Memory usage**: ~500MB
+**Default Settings**:
+- Trials: 100
+- Startup trials: 15
+- Timeout: 5 minutes
+- Memory usage: ~500MB
 
-### Scaling
-For larger optimizations:
-- Increase `n_trials` for better results
-- Adjust parameter ranges based on domain knowledge
-- Consider running multiple instances for parallel optimization
+For better results, increase the number of trials in the optimization settings.
+
+
 
 ## 🤝 Contributing
 
@@ -260,7 +308,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 If you encounter issues:
 1. Check the troubleshooting section above
-2. Review the logs in the terminal
+2. Review the logs in the terminal or Docker containers
 3. Check the API documentation at http://localhost:8000/docs
 4. Open an issue on GitHub
 
@@ -270,6 +318,11 @@ To update the application:
 ```bash
 git pull origin main
 pip install -r requirements.txt --upgrade
+
+# For Docker deployment
+docker-compose down
+docker-compose pull
+docker-compose up -d
 ```
 
 ---
