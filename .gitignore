@@ -6,6 +6,7 @@
 dlogs/
 logs/
 *.log
+README_AWS.md
 
 # Virtual environments
 .env
@@ -37,3 +38,9 @@ models/*.joblib
 .DS_Store
 Thumbs.db 
 .dump
+
+# SSL certificates and keys
+ssl/
+*.crt
+*.key
+*.pem
