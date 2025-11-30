@@ -16,8 +16,8 @@ class OptimizationModel:
     
     def predict(self, X):
         """
-        Predict thetaP values for input features.
-        X should be a 2D array with columns [DI, P, Gh, Gv, alpha, Q]
+        Predict migration angle theta_m for input features.
+        X should be a 2D array with columns: [DI, Pr, Pg, alpha]
         """
         # Ensure X is 2D
         if X.ndim == 1:

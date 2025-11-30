@@ -76,12 +76,10 @@ def get_default_parameters() -> Dict[str, Any]:
     
     # Fallback defaults
     return {
-        "DI1": 0.5, "DI2": 0.8, "R1": 0.5, "R2": 0.8,
-        "P_min": 5.0, "P_max": 15.0,
-        "Gh_min": 5.0, "Gh_max": 15.0,
-        "Gv_min": 5.0, "Gv_max": 15.0,
+        "DI1": 0.5, "DI2": 0.8, "R1": 7.5, "R2": 7.5,
+        "Pr_min": 4.0, "Pr_max": 10.0,
+        "Pg_min": 12.0, "Pg_max": 22.0,
         "alpha_min": 1.0, "alpha_max": 5.0,
-        "Q_min": 0.5, "Q_max": 5.0,
         "n_trials": 100, "n_startup_trials": 15, "random_state": 42
     }
 
@@ -183,25 +181,17 @@ def show_results(study, best_params, best_separation, optimization_time, study_d
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("### 🎯 Optimal Parameters")
-        st.metric("Post Size (P)", f"{best_params['P']:.2f} μm")
-        st.metric("Horizontal Gap (Gh)", f"{best_params['Gh']:.2f} μm")
-        st.metric("Vertical Gap (Gv)", f"{best_params['Gv']:.2f} μm")
-        st.metric("Row Shift (α)", f"{best_params['alpha']:.2f}°")
-        st.metric("Flow Rate (Q)", f"{best_params['Q']:.2f} μL/min")
+        st.markdown("### 🎯 Optimal Geometry")
+        st.metric("Pillar Radius (Pr)", f"{best_params['Pr']:.2f} μm")
+        st.metric("Pillar Gap (Pg)", f"{best_params['Pg']:.2f} μm")
+        st.metric("Row Shift Angle (α)", f"{best_params['alpha']:.2f}°")
     
     with col2:
-        st.markdown("### 📈 Performance Metrics")
-        st.metric("Max Separation Angle", f"{best_separation:.4f}°")
+        st.markdown("### 📈 Performance")
+        st.metric("Separation Angle", f"{best_separation:.4f}°")
         st.metric("Optimization Time", f"{optimization_time:.2f}s")
         if study and hasattr(study, 'trials'):
             st.metric("Trials Completed", len(study.trials))
-            st.metric("Best Trial", study.best_trial.number if study.best_trial else 0)
-            st.metric("Trials/min", f"{len(study.trials)/(optimization_time/60):.1f}")
-        else:
-            st.metric("Trials Completed", "N/A")
-            st.metric("Best Trial", "N/A")
-            st.metric("Trials/min", "N/A")
 
     # Parameter importance analysis
     st.markdown("## 📊 Analysis")
@@ -355,27 +345,21 @@ def show_results(study, best_params, best_separation, optimization_time, study_d
         "optimization_parameters": {
             "DI1": st.session_state.get('DI1', 0.5), 
             "DI2": st.session_state.get('DI2', 0.8), 
-            "R1": st.session_state.get('R1', 0.5), 
-            "R2": st.session_state.get('R2', 0.8),
-            "P_min": st.session_state.get('P_min', 5.0), 
-            "P_max": st.session_state.get('P_max', 15.0),
-            "Gh_min": st.session_state.get('Gh_min', 5.0), 
-            "Gh_max": st.session_state.get('Gh_max', 15.0),
-            "Gv_min": st.session_state.get('Gv_min', 5.0), 
-            "Gv_max": st.session_state.get('Gv_max', 15.0),
+            "R1": st.session_state.get('R1', 7.5), 
+            "R2": st.session_state.get('R2', 7.5),
+            "Pr_min": st.session_state.get('Pr_min', 4.0), 
+            "Pr_max": st.session_state.get('Pr_max', 12.0),
+            "Pg_min": st.session_state.get('Pg_min', 10.0), 
+            "Pg_max": st.session_state.get('Pg_max', 22.0),
             "alpha_min": st.session_state.get('alpha_min', 1.0), 
             "alpha_max": st.session_state.get('alpha_max', 5.0),
-            "Q_min": st.session_state.get('Q_min', 0.5), 
-            "Q_max": st.session_state.get('Q_max', 5.0),
             "n_trials": st.session_state.get('n_trials', 100), 
             "n_startup_trials": st.session_state.get('n_startup_trials', 15)
         },
         "optimal_parameters": {
-            "P": best_params['P'],
-            "Gh": best_params['Gh'],
-            "Gv": best_params['Gv'],
-            "alpha": best_params['alpha'],
-            "Q": best_params['Q']
+            "Pr": best_params['Pr'],
+            "Pg": best_params['Pg'],
+            "alpha": best_params['alpha']
         },
         "results": {
             "max_separation_angle": best_separation,
@@ -397,11 +381,9 @@ def show_results(study, best_params, best_separation, optimization_time, study_d
     
     # CSV download for optimal parameters
     optimal_params_df = pd.DataFrame([
-        {"Parameter": "Post Size (P)", "Value": best_params['P'], "Unit": "μm"},
-        {"Parameter": "Horizontal Gap (Gh)", "Value": best_params['Gh'], "Unit": "μm"},
-        {"Parameter": "Vertical Gap (Gv)", "Value": best_params['Gv'], "Unit": "μm"},
-        {"Parameter": "Row Shift Angle (α)", "Value": best_params['alpha'], "Unit": "°"},
-        {"Parameter": "Flow Rate (Q)", "Value": best_params['Q'], "Unit": "μL/min"}
+        {"Parameter": "Pillar Radius (Pr)", "Value": best_params['Pr'], "Unit": "μm"},
+        {"Parameter": "Pillar Gap (Pg)", "Value": best_params['Pg'], "Unit": "μm"},
+        {"Parameter": "Row Shift Angle (α)", "Value": best_params['alpha'], "Unit": "degrees"}
     ])
     
     st.download_button(
@@ -435,55 +417,40 @@ def main():
     st.sidebar.subheader("📊 Cell Parameters")
     DI1 = st.sidebar.number_input("Deformation Index of Cell 1 (DI1)", min_value=0.0, max_value=1.0, value=defaults["DI1"])
     DI2 = st.sidebar.number_input("Deformation Index of Cell 2 (DI2)", min_value=0.0, max_value=1.0, value=defaults["DI2"])
-    R1 = st.sidebar.number_input("Radius of Cell 1 (R1)", min_value=0.0, max_value=1.0, value=defaults["R1"])
-    R2 = st.sidebar.number_input("Radius of Cell 2 (R2)", min_value=0.0, max_value=1.0, value=defaults["R2"])
+    R1 = st.sidebar.number_input("Radius of Cell 1 (R1) [μm]", min_value=0.0, max_value=50.0, value=defaults["R1"])
+    R2 = st.sidebar.number_input("Radius of Cell 2 (R2) [μm]", min_value=0.0, max_value=50.0, value=defaults["R2"])
     
-    # DLD Parameters
-    st.sidebar.subheader("🔧 DLD Parameters")
+    # DLD Geometry Parameters
+    st.sidebar.subheader("🔧 DLD Geometry Parameters")
     
-    P_min, P_max = st.sidebar.slider(
-        "Pillar (P) Radius (μm)", 
-        min_value=0.0, 
-        max_value=50.0, 
-        value=(round(defaults["P_min"], 1), round(defaults["P_max"], 1)),
-        step=0.1,
-        format="%.1f"
+    Pr_min, Pr_max = st.sidebar.slider(
+        "Pillar Radius (Pr) [μm]", 
+        min_value=1.0, 
+        max_value=20.0, 
+        value=(round(defaults["Pr_min"], 1), round(defaults["Pr_max"], 1)),
+        step=0.5,
+        format="%.1f",
+        help="Pillar radius in micrometers (paper notation: P_r)"
     )
     
-    Gh_min, Gh_max = st.sidebar.slider(
-        "Horizontal Gap (Gh) (μm)", 
-        min_value=0.0, 
-        max_value=50.0, 
-        value=(round(defaults["Gh_min"], 1), round(defaults["Gh_max"], 1)),
-        step=0.1,
-        format="%.1f"
-    )
-    
-    Gv_min, Gv_max = st.sidebar.slider(
-        "Vertical Gap (Gv) (μm)", 
-        min_value=0.0, 
-        max_value=50.0, 
-        value=(round(defaults["Gv_min"], 1), round(defaults["Gv_max"], 1)),
-        step=0.1,
-        format="%.1f"
+    Pg_min, Pg_max = st.sidebar.slider(
+        "Pillar Gap (Pg) [μm]", 
+        min_value=5.0, 
+        max_value=30.0, 
+        value=(round(defaults["Pg_min"], 1), round(defaults["Pg_max"], 1)),
+        step=0.5,
+        format="%.1f",
+        help="Gap between pillars in micrometers (paper notation: P_g)"
     )
     
     alpha_min, alpha_max = st.sidebar.slider(
-        "Row Shift Angle (α) (deg)", 
+        "Row Shift Angle (α) [degrees]", 
         min_value=0.0, 
-        max_value=20.0, 
+        max_value=10.0, 
         value=(round(defaults["alpha_min"], 1), round(defaults["alpha_max"], 1)),
         step=0.1,
-        format="%.1f"
-    )
-    
-    Q_min, Q_max = st.sidebar.slider(
-        "Flow Rate (Q) (μL/min)", 
-        min_value=0.0, 
-        max_value=20.0, 
-        value=(round(defaults["Q_min"], 1), round(defaults["Q_max"], 1)),
-        step=0.1,
-        format="%.1f"
+        format="%.1f",
+        help="Row shift angle in degrees (continuous representation of periodicity N_p from paper)"
     )
     
     # Optimization parameters
@@ -510,11 +477,9 @@ def main():
         # Prepare parameters
         parameters = {
             "DI1": DI1, "DI2": DI2, "R1": R1, "R2": R2,
-            "P_min": P_min, "P_max": P_max,
-            "Gh_min": Gh_min, "Gh_max": Gh_max,
-            "Gv_min": Gv_min, "Gv_max": Gv_max,
+            "Pr_min": Pr_min, "Pr_max": Pr_max,
+            "Pg_min": Pg_min, "Pg_max": Pg_max,
             "alpha_min": alpha_min, "alpha_max": alpha_max,
-            "Q_min": Q_min, "Q_max": Q_max,
             "n_trials": n_trials, "n_startup_trials": n_startup_trials,
             "random_state": defaults["random_state"]
         }
@@ -533,11 +498,9 @@ def main():
             
             # Extract results
             best_params = {
-                'P': result['optimal_P'],
-                'Gh': result['optimal_Gh'],
-                'Gv': result['optimal_Gv'],
-                'alpha': result['optimal_alpha'],
-                'Q': result['optimal_Q']
+                'Pr': result['optimal_Pr'],
+                'Pg': result['optimal_Pg'],
+                'alpha': result['optimal_alpha']
             }
             best_separation = result['max_separation_angle']
             optimization_time = result['optimization_time']
@@ -576,16 +539,22 @@ def main():
         the separation angle difference between two cells with different deformation indices.
         
         ### 🚀 How to use:
-        1. **Set Parameters**: Adjust the cell parameters and DLD parameters in the sidebar
+        1. **Set Parameters**: Adjust the cell parameters and DLD geometry parameters in the sidebar
         2. **Configure Optimization**: Choose the number of trials and startup trials
         3. **Run Optimization**: Click the "Optimize DLD Geometry" button
         4. **Analyze Results**: View optimal parameters, performance metrics, and visualizations
         
         ### 🔬 About the Optimization:
+        - Optimizes **3 geometric parameters**: Pillar radius (Pr), Gap (Pg), Row shift angle (α)
         - Uses **Optuna's TPE (Tree-structured Parzen Estimator)** sampler
         - Considers parameter correlations for efficient exploration
-        - Provides comprehensive parameter importance analysis
-        - Shows detailed convergence history for optimization monitoring
+        - Based on published research in DLD device design
+        
+        ### 📊 Parameter Definitions:
+        - **Pr (P_r in paper)**: Pillar radius in micrometers
+        - **Pg (P_g in paper)**: Gap between pillars in micrometers  
+        - **α (N_p in paper)**: Row shift angle in degrees (continuous representation of periodicity)
+        - **DI**: Deformation Index = (a-b)/(a+b) where a,b are major/minor cell axes
         
         ### 📊 Advanced Visualizations:
         - **📈 Parameter Importance**: Bar chart showing which parameters most affect separation performance

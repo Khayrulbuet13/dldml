@@ -66,16 +66,12 @@ async def optimize_dld(
             DI2=request.DI2,
             R1=request.R1,
             R2=request.R2,
-            P_min=request.P_min,
-            P_max=request.P_max,
-            Gh_min=request.Gh_min,
-            Gh_max=request.Gh_max,
-            Gv_min=request.Gv_min,
-            Gv_max=request.Gv_max,
+            Pr_min=request.Pr_min,
+            Pr_max=request.Pr_max,
+            Pg_min=request.Pg_min,
+            Pg_max=request.Pg_max,
             alpha_min=request.alpha_min,
             alpha_max=request.alpha_max,
-            Q_min=request.Q_min,
-            Q_max=request.Q_max,
             n_trials=request.n_trials,
             n_startup_trials=request.n_startup_trials,
             random_state=request.random_state
@@ -94,11 +90,9 @@ async def optimize_dld(
         
         # Convert result to response model
         response = OptimizationResponse(
-            optimal_P=result.optimal_P,
-            optimal_Gh=result.optimal_Gh,
-            optimal_Gv=result.optimal_Gv,
+            optimal_Pr=result.optimal_Pr,
+            optimal_Pg=result.optimal_Pg,
             optimal_alpha=result.optimal_alpha,
-            optimal_Q=result.optimal_Q,
             max_separation_angle=result.max_separation_angle,
             optimization_time=result.optimization_time,
             n_trials=result.n_trials,
@@ -127,18 +121,14 @@ async def get_default_parameters():
     return {
         "DI1": 0.5,
         "DI2": 0.8,
-        "R1": 0.5,
-        "R2": 0.8,
-        "P_min": 5.0,
-        "P_max": 15.0,
-        "Gh_min": 5.0,
-        "Gh_max": 15.0,
-        "Gv_min": 5.0,
-        "Gv_max": 15.0,
-        "alpha_min": 1.0,
-        "alpha_max": 5.0,
-        "Q_min": 0.5,
-        "Q_max": 5.0,
+        "R1": 7.5,      # Cell radius in μm
+        "R2": 7.5,
+        "Pr_min": 4.0,  # Pillar radius min (μm)
+        "Pr_max": 10.0, # Pillar radius max (μm)
+        "Pg_min": 12.0, # Gap min (μm) - must be > Pr_max
+        "Pg_max": 22.0, # Gap max (μm)
+        "alpha_min": 1.0,  # Row shift angle min (degrees)
+        "alpha_max": 5.0,  # Row shift angle max (degrees)
         "n_trials": 100,
         "n_startup_trials": 15,
         "random_state": 42

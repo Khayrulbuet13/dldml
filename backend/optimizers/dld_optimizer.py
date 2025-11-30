@@ -51,21 +51,19 @@ if '__main__' not in sys.modules:
 class OptimizationParameters:
     """Data class for optimization parameters."""
     # Cell Parameters
-    DI1: float
-    DI2: float
-    R1: float
-    R2: float
-    # DLD Parameters
-    P_min: float
-    P_max: float
-    Gh_min: float
-    Gh_max: float
-    Gv_min: float
-    Gv_max: float
-    alpha_min: float
-    alpha_max: float
-    Q_min: float
-    Q_max: float
+    DI1: float          # Deformation Index cell 1
+    DI2: float          # Deformation Index cell 2
+    R1: float           # Cell radius 1 (informational)
+    R2: float           # Cell radius 2 (informational)
+    
+    # DLD Geometry Parameters (3 continuous parameters to optimize)
+    Pr_min: float       # Pillar radius min (μm)
+    Pr_max: float       # Pillar radius max (μm)
+    Pg_min: float       # Pillar gap min (μm)
+    Pg_max: float       # Pillar gap max (μm)
+    alpha_min: float    # Row shift angle min (degrees)
+    alpha_max: float    # Row shift angle max (degrees)
+    
     # Optimization Settings
     n_trials: int = 100
     n_startup_trials: int = 15
@@ -74,11 +72,9 @@ class OptimizationParameters:
 @dataclass
 class OptimizationResult:
     """Data class for optimization results."""
-    optimal_P: float
-    optimal_Gh: float
-    optimal_Gv: float
-    optimal_alpha: float
-    optimal_Q: float
+    optimal_Pr: float      # Optimal pillar radius
+    optimal_Pg: float      # Optimal pillar gap
+    optimal_alpha: float   # Optimal row shift angle
     max_separation_angle: float
     optimization_time: float
     n_trials: int
@@ -110,51 +106,24 @@ class DLDOptimizer:
                 logger.info("Creating a simple fallback model...")
                 return self._create_fallback_model()
             
-            # Try to load with custom handling for the OptimizationModel class
+            # Try to load model directly (joblib handles class resolution)
             try:
                 model = joblib.load(self.model_path)
                 logger.info("Model loaded successfully")
                 
-                # Check if it's our OptimizationModel
-                if hasattr(model, 'xgb_model') and hasattr(model, 'scaler') and hasattr(model, 'selector'):
-                    logger.info("Loaded OptimizationModel with XGBoost and preprocessing")
-                    logger.info(f"Feature names: {model.feature_names}")
+                # Verify it's a valid model
+                if hasattr(model, 'xgb_model') and hasattr(model, 'scaler'):
+                    logger.info("✓ Loaded OptimizationModel with XGBoost")
+                    logger.info(f"✓ Feature names: {model.feature_names}")
+                    logger.info(f"✓ Has selector: {model.selector is not None}")
                     return model
                 else:
-                    logger.warning("Loaded model is not an OptimizationModel, using fallback")
+                    logger.warning("Model missing required attributes, using fallback")
                     return self._create_fallback_model()
                     
             except Exception as load_error:
-                if "Can't get attribute 'OptimizationModel'" in str(load_error):
-                    logger.info("Attempting to load model with custom unpickler...")
-                    
-                    # Use a custom approach to load the model
-                    import pickle
-                    import io
-                    
-                    # Create a custom unpickler that maps __main__.OptimizationModel to our class
-                    class CustomUnpickler(pickle.Unpickler):
-                        def find_class(self, module, name):
-                            if module == '__main__' and name == 'OptimizationModel':
-                                return OptimizationModel
-                            return super().find_class(module, name)
-                    
-                    # Load the model with custom unpickler
-                    with open(self.model_path, 'rb') as f:
-                        model = CustomUnpickler(f).load()
-                    
-                    logger.info("Model loaded successfully with custom unpickler")
-                    
-                    # Check if it's our OptimizationModel
-                    if hasattr(model, 'xgb_model') and hasattr(model, 'scaler') and hasattr(model, 'selector'):
-                        logger.info("Loaded OptimizationModel with XGBoost and preprocessing")
-                        logger.info(f"Feature names: {model.feature_names}")
-                        return model
-                    else:
-                        logger.warning("Loaded model is not an OptimizationModel, using fallback")
-                        return self._create_fallback_model()
-                else:
-                    raise load_error
+                logger.error(f"Model loading failed: {load_error}")
+                raise load_error
                 
         except Exception as e:
             logger.error(f"Failed to load model: {e}")
@@ -168,34 +137,32 @@ class DLDOptimizer:
         # Create a simple model with default parameters
         model = RandomForestRegressor(n_estimators=10, random_state=42)
         
-        # Train on some dummy data to make it functional
+        # Train on dummy data: 4 features [DI, Pr, Pg, alpha]
         import numpy as np
         np.random.seed(42)
-        X = np.random.rand(100, 6)  # 6 features: DI, P, Gh, Gv, alpha, Q
+        X = np.random.rand(100, 4)  # 4 features
         y = np.random.rand(100) * 10  # Random theta values
         
         model.fit(X, y)
-        logger.info("Fallback model created successfully")
+        logger.info("Fallback model created with 4 features: [DI, Pr, Pg, alpha]")
         return model
     
-    def _predict_theta(self, DI: float, P: float, Gh: float, Gv: float, alpha: float, Q: float) -> float:
+    def _predict_theta(self, DI: float, Pr: float, Pg: float, alpha: float) -> float:
         """
-        Predict theta using the ML model.
+        Predict migration angle theta using the ML model.
         
         Args:
-            DI: Deformation Index
-            P: Post Size
-            Gh: Horizontal Gap Size
-            Gv: Vertical Gap Size
-            alpha: Row Shift
-            Q: Flow Rate
+            DI: Deformation Index [0-1]
+            Pr: Pillar Radius (μm)
+            Pg: Pillar Gap (μm)
+            alpha: Row Shift Angle (degrees, continuous representation of periodicity)
             
         Returns:
-            Predicted theta value
+            Predicted migration angle theta (degrees)
         """
         try:
-            # Prepare the input features in the format expected by the model
-            input_features = np.array([[DI, P, Gh, Gv, alpha, Q]])
+            # Model expects 4 features: [DI, Pr, Pg, alpha]
+            input_features = np.array([[DI, Pr, Pg, alpha]])
             
             # Use the model's predict method (works for both OptimizationModel and fallback)
             theta = self.model.predict(input_features)[0]
@@ -203,11 +170,15 @@ class DLDOptimizer:
             return theta
         except Exception as e:
             logger.error(f"Prediction failed: {e}")
+            logger.error(f"Input was: DI={DI}, Pr={Pr}, Pg={Pg}, alpha={alpha}")
             raise
     
     def _create_objective_function(self, params: OptimizationParameters):
         """
         Create the objective function for Optuna optimization.
+        
+        Optimizes 3 continuous parameters: Pr, Pg, alpha
+        Objective: maximize |theta(DI2) - theta(DI1)|
         
         Args:
             params: Optimization parameters
@@ -217,26 +188,26 @@ class DLDOptimizer:
         """
         def objective(trial):
             # Suggest parameters using Optuna's TPE sampler
-            P = trial.suggest_float('P', params.P_min, params.P_max)
-            Gh = trial.suggest_float('Gh', params.Gh_min, params.Gh_max)
-            Gv = trial.suggest_float('Gv', params.Gv_min, params.Gv_max)
+            Pr = trial.suggest_float('Pr', params.Pr_min, params.Pr_max)
+            Pg = trial.suggest_float('Pg', params.Pg_min, params.Pg_max)
             alpha = trial.suggest_float('alpha', params.alpha_min, params.alpha_max)
-            Q = trial.suggest_float('Q', params.Q_min, params.Q_max)
             
-            # Constraint: Gh must be greater than P
-            if Gh <= P:
+            # Physical constraint: Gap must be larger than pillar radius
+            # to prevent clogging and maintain fluid flow
+            d_safety = 0.5  # Safety margin in micrometers
+            if Pg <= Pr + d_safety:
                 return 1e6  # Large penalty for invalid configurations
             
-            # Get the separation angles from the model
-            theta1 = self._predict_theta(params.DI1, P, Gh, Gv, alpha, Q)
-            theta2 = self._predict_theta(params.DI2, P, Gh, Gv, alpha, Q)
+            # Predict migration angles for both cell types
+            theta1 = self._predict_theta(params.DI1, Pr, Pg, alpha)
+            theta2 = self._predict_theta(params.DI2, Pr, Pg, alpha)
             
-            # Compute the objective function f(G) = |theta2 - theta1|
-            f_G = abs(theta2 - theta1)
+            # Objective function: maximize separation angle difference
+            # f(G) = |theta2 - theta1|
+            separation_angle = abs(theta2 - theta1)
             
             # Return negative because Optuna minimizes by default
-            # and we want to maximize the separation angle difference
-            return -f_G
+            return -separation_angle
         
         return objective
     
@@ -279,11 +250,53 @@ class DLDOptimizer:
         best_separation = -study.best_value  # Convert back to positive separation
         
         # Get parameter importance
+        # Use ML model's feature importance directly (more reliable than Optuna importance)
         try:
-            param_importance = optuna.importance.get_param_importances(study)
+            if hasattr(self.model, 'xgb_model') and hasattr(self.model, 'feature_names'):
+                # Extract XGBoost feature importance
+                xgb_importance = self.model.xgb_model.get_score(importance_type='gain')
+                feature_names = self.model.feature_names
+                
+                logger.info(f"XGBoost raw importance: {xgb_importance}")
+                logger.info(f"Feature names: {feature_names}")
+                
+                # Build feature importance dict
+                all_importance = {}
+                for feat_key, score in xgb_importance.items():
+                    feat_idx = int(feat_key.replace('f', ''))
+                    if feat_idx < len(feature_names):
+                        # Clean numpy string if needed
+                        feat_name = str(feature_names[feat_idx])
+                        if 'np.str_' in feat_name:
+                            import re
+                            match = re.search(r"'([^']+)'", feat_name)
+                            feat_name = match.group(1) if match else feat_name
+                        all_importance[feat_name.strip()] = float(score)
+                
+                logger.info(f"Mapped importance: {all_importance}")
+                
+                # Extract only optimization parameters (exclude DI)
+                param_importance = {k: v for k, v in all_importance.items() 
+                                   if k in ['Pr', 'Pg', 'alpha']}
+                
+                # If any parameter missing, use small value
+                for param in ['Pr', 'Pg', 'alpha']:
+                    if param not in param_importance:
+                        param_importance[param] = 0.01
+                
+                # Normalize
+                total = sum(param_importance.values())
+                if total > 0:
+                    param_importance = {k: v/total for k, v in param_importance.items()}
+                
+                logger.info(f"Final parameter importance: {param_importance}")
+            else:
+                # Fallback
+                logger.warning("Model structure doesn't support importance extraction")
+                param_importance = {'Pr': 0.33, 'Pg': 0.33, 'alpha': 0.34}
         except Exception as e:
-            logger.warning(f"Could not compute parameter importance: {e}")
-            param_importance = {}
+            logger.error(f"Parameter importance calculation failed: {e}", exc_info=True)
+            param_importance = {'Pr': 0.33, 'Pg': 0.33, 'alpha': 0.34}
         
         # Get convergence history
         convergence_history = [-value for value in study.trials_dataframe()['value'].tolist()]
@@ -312,11 +325,9 @@ class DLDOptimizer:
         
         # Create result object
         result = OptimizationResult(
-            optimal_P=best_params['P'],
-            optimal_Gh=best_params['Gh'],
-            optimal_Gv=best_params['Gv'],
+            optimal_Pr=best_params['Pr'],
+            optimal_Pg=best_params['Pg'],
             optimal_alpha=best_params['alpha'],
-            optimal_Q=best_params['Q'],
             max_separation_angle=best_separation,
             optimization_time=optimization_time,
             n_trials=len(study.trials),
@@ -345,27 +356,35 @@ class DLDOptimizer:
         errors = []
         
         # Check parameter bounds
-        if params.P_min >= params.P_max:
-            errors.append("P_min must be less than P_max")
+        if params.Pr_min >= params.Pr_max:
+            errors.append("Pr_min must be less than Pr_max")
         
-        if params.Gh_min >= params.Gh_max:
-            errors.append("Gh_min must be less than Gh_max")
-        
-        if params.Gv_min >= params.Gv_max:
-            errors.append("Gv_min must be less than Gv_max")
+        if params.Pg_min >= params.Pg_max:
+            errors.append("Pg_min must be less than Pg_max")
         
         if params.alpha_min >= params.alpha_max:
             errors.append("alpha_min must be less than alpha_max")
         
-        if params.Q_min >= params.Q_max:
-            errors.append("Q_min must be less than Q_max")
-        
-        # Check DI values
+        # Check DI values are in valid range
         if not (0 <= params.DI1 <= 1):
             errors.append("DI1 must be between 0 and 1")
         
         if not (0 <= params.DI2 <= 1):
             errors.append("DI2 must be between 0 and 1")
+        
+        # Check physical constraint: gap must be larger than pillar radius
+        if params.Pg_min <= params.Pr_max:
+            errors.append("Minimum gap (Pg_min) must be larger than maximum pillar radius (Pr_max)")
+        
+        # Check positive values
+        if params.Pr_min <= 0:
+            errors.append("Pr_min must be positive")
+        
+        if params.Pg_min <= 0:
+            errors.append("Pg_min must be positive")
+        
+        if params.alpha_min < 0:
+            errors.append("alpha_min must be non-negative")
         
         # Check trial numbers
         if params.n_trials < 1:

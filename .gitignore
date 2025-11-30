@@ -1,46 +1,34 @@
-# Python cache and bytecode
-**/__pycache__/
+# Python cache
+__pycache__/
 *.py[cod]
 
-# Logs
-dlogs/
-logs/
-*.log
-README_AWS.md
-
 # Virtual environments
-.env
-.venv
-env/
 venv/
-ENV/
-env.bak/
-venv.bak/
+env/
+dld_env/
 
-# Jupyter Notebook checkpoints
-.ipynb_checkpoints/
+# Logs
+*.log
+logs/*.log
 
-# Test/coverage
-.pytest_cache/
-.coverage
-.cache
-
-# Model artifacts
-models/*.joblib
-
-# IDE/editor
+# IDE
 .vscode/
 .idea/
 *.swp
-*~
+*.swo
 
-# OS files
+# OS
 .DS_Store
-Thumbs.db 
-.dump
 
-# SSL certificates and keys
-ssl/
-*.crt
-*.key
-*.pem
+# Environment variables
+.env
+
+# Test files
+test_request.json
+test_*.json
+
+# Temporary files
+*.tmp
+tmp/
+models/model_info.joblib
+models/predictions.csv

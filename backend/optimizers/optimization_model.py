@@ -10,8 +10,14 @@ class OptimizationModel:
     
     def predict(self, X):
         """
-        Predict thetaP values for input features.
-        X should be a 2D array with columns [DI, P, Gh, Gv, alpha, Q]
+        Predict migration angle theta_m for input features.
+        X should be a 2D array with columns: [DI, Pr, Pg, alpha]
+        
+        Where:
+            DI: Deformation Index [0-1]
+            Pr: Pillar radius (μm)
+            Pg: Pillar gap (μm)
+            alpha: Row shift angle (degrees, continuous representation of N_p)
         """
         # Ensure X is 2D
         if X.ndim == 1:
@@ -20,8 +26,11 @@ class OptimizationModel:
         # Scale the features
         X_scaled = self.scaler.transform(X)
         
-        # Apply feature selection
-        X_selected = self.selector.transform(X_scaled)
+        # Apply feature selection (if selector exists)
+        if self.selector is not None:
+            X_selected = self.selector.transform(X_scaled)
+        else:
+            X_selected = X_scaled
         
         # Convert to DMatrix
         dmatrix = xgb.DMatrix(X_selected)
