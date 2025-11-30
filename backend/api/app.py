@@ -97,17 +97,4 @@ def create_app(config: BaseConfig = None) -> FastAPI:
     return app
 
 # Create app instance for direct execution
-app = create_app()
-
-if __name__ == "__main__":
-    import uvicorn
-    from config.base import BaseConfig
-    
-    config = BaseConfig()
-    uvicorn.run(
-        "app:app",
-        host=config.API_HOST,
-        port=config.API_PORT,
-        reload=config.DEBUG,
-        workers=config.API_WORKERS if not config.DEBUG else 1
-    ) 
+app = create_app() 

@@ -45,12 +45,6 @@ def main():
         choices=["backend", "frontend", "both"],
         help="Service to start"
     )
-    parser.add_argument(
-        "--config",
-        choices=["dev", "prod"],
-        default="dev",
-        help="Configuration to use"
-    )
     
     args = parser.parse_args()
     

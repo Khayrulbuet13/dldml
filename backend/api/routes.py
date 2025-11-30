@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException, Depends
-from fastapi.middleware.cors import CORSMiddleware
 from typing import Dict, Any
 import logging
 
