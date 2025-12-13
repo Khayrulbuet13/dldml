@@ -17,6 +17,12 @@ By integrating high-fidelity lattice-Boltzmann simulations with gradient-boosted
 
 ## Quick Start
 
+### 🌐 Web Version
+
+**Try it online:** [https://dldml.khayrul.me/](https://dldml.khayrul.me/)
+
+The web version is fully functional and ready to use - no installation required!
+
 ### Prerequisites
 
 - Python 3.10+
@@ -57,9 +63,10 @@ docker-compose up -d
 ```
 
 **Access the Application:**
-- Frontend UI: http://localhost:8501
-- Backend API: http://localhost:8000
-- API Documentation: http://localhost:8000/docs
+- **Web Version (Recommended)**: [https://dldml.khayrul.me/](https://dldml.khayrul.me/)
+- **Local Frontend UI**: http://localhost:8501
+- **Local Backend API**: http://localhost:8000
+- **Local API Documentation**: http://localhost:8000/docs
 
 ## Usage
 

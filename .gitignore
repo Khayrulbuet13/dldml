@@ -20,16 +20,14 @@ logs/*.log
 # OS
 .DS_Store
 
-<<<<<<< Updated upstream
 # Environment variables
 .env
-=======
+
 # SSL certificates and keys
 ssl/
 *.crt
 *.key
 *.pem
->>>>>>> Stashed changes
 
 # Test files
 test_request.json
@@ -38,14 +36,9 @@ test_*.json
 # Temporary files
 *.tmp
 tmp/
-<<<<<<< Updated upstream
-models/model_info.joblib
-models/predictions.csv
-=======
-CODE_REVIEW.md
+.dump
 
 # Models
 models/model_info.joblib
 models/predictions.csv
 models/trained_model.joblib
->>>>>>> Stashed changes
