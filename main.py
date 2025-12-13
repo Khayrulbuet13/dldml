@@ -13,7 +13,6 @@ sys.path.insert(0, str(project_root))
 
 from config.base import BaseConfig
 from backend.api.app import create_app
-from app.main import main as streamlit_main
 
 def start_backend():
     """Start the backend API service."""
@@ -24,16 +23,20 @@ def start_backend():
     app = create_app(config)
     
     print(f"Starting backend API on {config.API_HOST}:{config.API_PORT}")
+    # Disable reload in Docker/production (reload requires import string, not app object)
+    # Workers and reload are mutually exclusive
     uvicorn.run(
         app,
         host=config.API_HOST,
         port=config.API_PORT,
-        reload=config.DEBUG,
+        reload=False,
         workers=config.API_WORKERS if not config.DEBUG else 1
     )
 
 def start_frontend():
     """Start the Streamlit frontend."""
+    # Lazy import to avoid loading Streamlit when running backend
+    from app.main import main as streamlit_main
     print("Starting Streamlit frontend...")
     streamlit_main()
 

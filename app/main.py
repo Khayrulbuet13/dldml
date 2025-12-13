@@ -405,7 +405,10 @@ def main():
         st.info("To start the backend, run: `python -m backend.api.app`")
         return
     
-    # Sidebar
+    # Sidebar - Logo will appear in upper-left automatically
+    logo_path = project_root / "images" / "logo.svg"
+    if logo_path.exists():
+        st.logo(str(logo_path), size="large")
     st.sidebar.header("Input Parameters")
     
     # Get default parameters
@@ -421,34 +424,65 @@ def main():
     # DLD Geometry Parameters
     st.sidebar.subheader("🔧 DLD Geometry Parameters")
     
-    Pr_min, Pr_max = st.sidebar.slider(
-        "Pillar Radius (Pr) [μm]", 
-        min_value=1.0, 
-        max_value=20.0, 
-        value=(round(defaults["Pr_min"], 1), round(defaults["Pr_max"], 1)),
+    # Pillar Radius (Pr) - min is hardcoded, max is flexible
+    Pr_min = st.sidebar.number_input(
+        "Pillar Radius Min (Pr_min) [μm]", 
+        min_value=0.1, 
+        value=round(defaults["Pr_min"], 1),
         step=0.5,
         format="%.1f",
-        help="Pillar radius in micrometers (paper notation: P_r)"
+        help="Minimum pillar radius in micrometers (paper notation: P_r)"
     )
-    
-    Pg_min, Pg_max = st.sidebar.slider(
-        "Pillar Gap (Pg) [μm]", 
-        min_value=5.0, 
-        max_value=30.0, 
-        value=(round(defaults["Pg_min"], 1), round(defaults["Pg_max"], 1)),
+    Pr_max = st.sidebar.number_input(
+        "Pillar Radius Max (Pr_max) [μm]", 
+        min_value=Pr_min + 0.1, 
+        value=round(defaults["Pr_max"], 1),
         step=0.5,
         format="%.1f",
-        help="Gap between pillars in micrometers (paper notation: P_g)"
+        help="Maximum pillar radius in micrometers (must be > Pr_min)"
     )
     
-    alpha_min, alpha_max = st.sidebar.slider(
-        "Row Shift Angle (α) [degrees]", 
+    # Pillar Gap (Pg) - min must be > Pr_max (physical constraint: gap must be larger than pillar radius)
+    # This prevents clogging and maintains fluid flow
+    Pg_min = st.sidebar.number_input(
+        "Pillar Gap Min (Pg_min) [μm]", 
+        min_value=Pr_max + 0.1,  # Must be larger than maximum pillar radius
+        value=max(round(defaults["Pg_min"], 1), Pr_max + 0.1),  # Ensure default is valid
+        step=0.5,
+        format="%.1f",
+        help=f"Minimum gap between pillars in micrometers. Must be > Pr_max ({Pr_max:.1f} μm) to prevent clogging."
+    )
+    Pg_max = st.sidebar.number_input(
+        "Pillar Gap Max (Pg_max) [μm]", 
+        min_value=Pg_min + 0.1, 
+        value=round(defaults["Pg_max"], 1),
+        step=0.5,
+        format="%.1f",
+        help="Maximum gap between pillars in micrometers (must be > Pg_min)"
+    )
+    
+    # Show constraint info
+    if Pg_min <= Pr_max:
+        st.sidebar.warning(f"⚠️ **Physical Constraint**: Pg_min ({Pg_min:.1f} μm) must be > Pr_max ({Pr_max:.1f} μm) to prevent clogging. Please increase Pg_min.")
+    else:
+        st.sidebar.info(f"✓ **Valid**: Gap ({Pg_min:.1f} μm) > Pillar Radius ({Pr_max:.1f} μm)")
+    
+    # Row Shift Angle (alpha) - min is hardcoded, max is flexible
+    alpha_min = st.sidebar.number_input(
+        "Row Shift Angle Min (α_min) [degrees]", 
         min_value=0.0, 
-        max_value=10.0, 
-        value=(round(defaults["alpha_min"], 1), round(defaults["alpha_max"], 1)),
+        value=round(defaults["alpha_min"], 1),
         step=0.1,
         format="%.1f",
-        help="Row shift angle in degrees (continuous representation of periodicity N_p from paper)"
+        help="Minimum row shift angle in degrees (continuous representation of periodicity N_p from paper)"
+    )
+    alpha_max = st.sidebar.number_input(
+        "Row Shift Angle Max (α_max) [degrees]", 
+        min_value=alpha_min + 0.1, 
+        value=round(defaults["alpha_max"], 1),
+        step=0.1,
+        format="%.1f",
+        help="Maximum row shift angle in degrees (must be > alpha_min)"
     )
     
     # Optimization parameters
