@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Testing
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Development
+.env
+.env.local
+*.log
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+README.md
+LICENSE.txt
+
+# Development scripts
+start_dev.sh
+setup.py
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Model files (mounted as volumes in docker-compose)
+models/
+*.joblib
+*.csv
+
+# Data (mounted as volumes)
+data/
+
+# Logs (mounted as volumes)
+logs/
+
+# Docker
+Dockerfile*
+docker-compose.yml
+.dockerignore
+
+# Nginx config (not needed in images)
+nginx.conf
+
+# Images/assets (if not needed at runtime)
+images/
+
