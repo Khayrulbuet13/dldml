@@ -20,9 +20,9 @@ setup(
     description="A full-stack web application for optimizing DLD geometry parameters",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author="DLD Optimization Team",
-    author_email="team@example.com",
-    url="https://github.com/your-org/dld-optimization",
+    author="Khayrul Islam, Mehedi Hasan, Yaling Liu",
+    author_email="khayrulbuet13@alum.lehigh.edu",
+    url="https://github.com/Khayrulbuet13/dldml",
     packages=find_packages(),
     include_package_data=True,
     install_requires=requirements,
@@ -43,8 +43,7 @@ setup(
     ],
     keywords="dld optimization machine learning streamlit fastapi",
     project_urls={
-        "Bug Reports": "https://github.com/your-org/dld-optimization/issues",
-        "Source": "https://github.com/your-org/dld-optimization",
-        "Documentation": "https://github.com/your-org/dld-optimization/docs",
+        "Bug Reports": "https://github.com/Khayrulbuet13/dldml/issues",
+        "Source": "https://github.com/Khayrulbuet13/dldml",
     },
 ) 

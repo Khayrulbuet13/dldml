@@ -97,7 +97,21 @@ class DLDOptimizer:
             return self._create_fallback_model()
     
     def _create_fallback_model(self):
-        """Create a simple fallback model when the trained model is not available."""
+        """Create a simple fallback model when the trained model is not available.
+
+        This fallback exists solely to verify that the end-to-end pipeline
+        (API routing, parameter validation, TPE optimization loop, result
+        serialization) works correctly without requiring the production model
+        file.  Its predictions are intentionally random and must NOT be used
+        for real DLD device design.
+
+        To activate the production surrogate, place your trained XGBoost model
+        (an OptimizationModel instance saved with joblib) at the path specified
+        by config.MODEL_PATH (default: models/trained_model.joblib).  You can
+        retrain the surrogate on your own LB/IB simulation corpus by following
+        the training workflow described in the paper and then saving the fitted
+        OptimizationModel with joblib.dump().
+        """
         from sklearn.ensemble import RandomForestRegressor
         
         # Create a simple model with default parameters
@@ -158,11 +172,12 @@ class DLDOptimizer:
             Pg = trial.suggest_float('Pg', params.Pg_min, params.Pg_max)
             alpha = trial.suggest_float('alpha', params.alpha_min, params.alpha_max)
             
-            # Physical constraint: Gap must be larger than pillar radius
-            # to prevent clogging and maintain fluid flow
+            # Physical constraint: gap must exceed the larger cell radius plus a safety margin
+            # (Eq. clogging_constraint in the paper: P_g > max(C_r1,C_r2) + d_safety).
+            # Using cell radii rather than pillar radius ensures cells can pass without clogging.
             d_safety = 0.5  # Safety margin in micrometers
-            if Pg <= Pr + d_safety:
-                return 1e6  # Large penalty for invalid configurations
+            if Pg <= max(params.R1, params.R2) + d_safety:
+                return 1e6  # Large penalty for infeasible configurations
             
             # Predict migration angles for both cell types
             theta1 = self._predict_theta(params.DI1, Pr, Pg, alpha)
@@ -338,9 +353,15 @@ class DLDOptimizer:
         if not (0 <= params.DI2 <= 1):
             errors.append("DI2 must be between 0 and 1")
         
-        # Check physical constraint: gap must be larger than pillar radius
-        if params.Pg_min <= params.Pr_max:
-            errors.append("Minimum gap (Pg_min) must be larger than maximum pillar radius (Pr_max)")
+        # Check physical constraint: gap must exceed max cell radius + safety margin
+        # (matches paper Eq. clogging_constraint: P_g > max(C_r1,C_r2)+d_safety)
+        d_safety = 0.5
+        min_required_gap = max(params.R1, params.R2) + d_safety
+        if params.Pg_min <= min_required_gap:
+            errors.append(
+                f"Minimum gap (Pg_min) must be larger than max cell radius + 0.5 μm safety margin "
+                f"({min_required_gap:.1f} μm)"
+            )
         
         # Check positive values
         if params.Pr_min <= 0:

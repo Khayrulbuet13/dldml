@@ -77,7 +77,7 @@ def get_default_parameters() -> Dict[str, Any]:
         "DI1": 0.5, "DI2": 0.8, "R1": 7.5, "R2": 7.5,
         "Pr_min": 4.0, "Pr_max": 10.0,
         "Pg_min": 12.0, "Pg_max": 22.0,
-        "alpha_min": 1.0, "alpha_max": 5.0,
+        "alpha_min": 1.0, "alpha_max": 15.0,
         "n_trials": 100, "n_startup_trials": 15, "random_state": 42
     }
 
@@ -249,12 +249,12 @@ def show_results(study, best_params, best_separation, optimization_time, study_d
                         st.session_state.y_param = param_options[0]  # Same parameter as fallback
                     else:
                         # Fallback if no parameters available
-                        param_options = ['P', 'Gh', 'Gv', 'alpha', 'Q']
+                        param_options = ['Pr', 'Pg', 'alpha']
                         st.session_state.x_param = param_options[0]
                         st.session_state.y_param = param_options[1]
                 except:
                     # Fallback if parameter importance fails
-                    param_options = ['P', 'Gh', 'Gv', 'alpha', 'Q']
+                    param_options = ['Pr', 'Pg', 'alpha']
                     st.session_state.x_param = param_options[0]
                     st.session_state.y_param = param_options[1]
             
@@ -264,12 +264,12 @@ def show_results(study, best_params, best_separation, optimization_time, study_d
                 param_options = list(param_importance.keys())
             except:
                 # Fallback if parameter importance fails
-                param_options = ['P', 'Gh', 'Gv', 'alpha', 'Q']
+                param_options = ['Pr', 'Pg', 'alpha']
             
             # Ensure we have enough parameters
             if len(param_options) < 2:
                 # Use fallback parameters if we don't have enough
-                param_options = ['P', 'Gh', 'Gv', 'alpha', 'Q']
+                param_options = ['Pr', 'Pg', 'alpha']
             
             # Ensure current session state values are valid
             if st.session_state.x_param not in param_options:
@@ -350,7 +350,7 @@ def show_results(study, best_params, best_separation, optimization_time, study_d
             "Pg_min": st.session_state.get('Pg_min', 10.0), 
             "Pg_max": st.session_state.get('Pg_max', 22.0),
             "alpha_min": st.session_state.get('alpha_min', 1.0), 
-            "alpha_max": st.session_state.get('alpha_max', 5.0),
+            "alpha_max": st.session_state.get('alpha_max', 15.0),
             "n_trials": st.session_state.get('n_trials', 100), 
             "n_startup_trials": st.session_state.get('n_startup_trials', 15)
         },
@@ -442,15 +442,16 @@ def main():
         help="Maximum pillar radius in micrometers (must be > Pr_min)"
     )
     
-    # Pillar Gap (Pg) - min must be > Pr_max (physical constraint: gap must be larger than pillar radius)
-    # This prevents clogging and maintains fluid flow
+    # Pillar Gap (Pg) - min must exceed max cell radius + safety margin (clogging constraint)
+    # This prevents clogging and maintains fluid flow (paper Eq. clogging_constraint)
+    min_required_gap = max(R1, R2) + 0.5
     Pg_min = st.sidebar.number_input(
         "Pillar Gap Min (Pg_min) [μm]", 
-        min_value=Pr_max + 0.1,  # Must be larger than maximum pillar radius
-        value=max(round(defaults["Pg_min"], 1), Pr_max + 0.1),  # Ensure default is valid
+        min_value=round(min_required_gap, 1),  # Must exceed max cell radius + safety margin
+        value=max(round(defaults["Pg_min"], 1), round(min_required_gap, 1)),  # Ensure default is valid
         step=0.5,
         format="%.1f",
-        help=f"Minimum gap between pillars in micrometers. Must be > Pr_max ({Pr_max:.1f} μm) to prevent clogging."
+        help=f"Minimum gap between pillars in micrometers. Must exceed max cell radius + 0.5 μm safety margin to prevent clogging (paper Eq. clogging_constraint)."
     )
     Pg_max = st.sidebar.number_input(
         "Pillar Gap Max (Pg_max) [μm]", 
@@ -462,10 +463,10 @@ def main():
     )
     
     # Show constraint info
-    if Pg_min <= Pr_max:
-        st.sidebar.warning(f"⚠️ **Physical Constraint**: Pg_min ({Pg_min:.1f} μm) must be > Pr_max ({Pr_max:.1f} μm) to prevent clogging. Please increase Pg_min.")
+    if Pg_min <= min_required_gap:
+        st.sidebar.warning(f"⚠️ **Physical Constraint**: Pg_min ({Pg_min:.1f} μm) must be > max cell radius + 0.5 μm safety margin ({min_required_gap:.1f} μm) to prevent clogging. Please increase Pg_min.")
     else:
-        st.sidebar.info(f"✓ **Valid**: Gap ({Pg_min:.1f} μm) > Pillar Radius ({Pr_max:.1f} μm)")
+        st.sidebar.info(f"✓ **Valid**: Gap ({Pg_min:.1f} μm) > max cell radius + 0.5 μm ({min_required_gap:.1f} μm)")
     
     # Row Shift Angle (alpha) - min is hardcoded, max is flexible
     alpha_min = st.sidebar.number_input(

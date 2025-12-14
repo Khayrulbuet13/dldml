@@ -9,9 +9,9 @@ By integrating high-fidelity lattice-Boltzmann simulations with gradient-boosted
 ## Key Features
 
 - **Inverse Design**: Transforms measured deformation index (DI) into optimal DLD geometry (Pr, Pg, α)
-- **High-Fidelity Surrogates**: XGBoost model with R² = 0.9999, MSE = 2×10⁻⁴
+- **High-Fidelity Surrogates**: XGBoost model with held-out R² = 0.9717, grouped-CV R² = 0.946 ± 0.031, RMSE = 0.365°
 - **Rapid Optimization**: Sub-60 second optimization using Optuna TPE sampler
-- **Physical Constraints**: Enforces Pg > Pr + 0.5 μm safety margin
+- **Physical Constraints**: Enforces clogging constraint Pg > max(R₁, R₂) + 0.5 μm safety margin
 - **Statistical Validation**: Type II ANOVA with interaction analysis (p < 10⁻³⁰)
 - **Web Deployment**: Accessible FastAPI + Streamlit interface
 
@@ -94,7 +94,7 @@ curl -X POST http://localhost:8000/api/v1/optimize \
     "R1": 7.5, "R2": 7.5,
     "Pr_min": 4.0, "Pr_max": 10.0,
     "Pg_min": 12.0, "Pg_max": 22.0,
-    "alpha_min": 1.0, "alpha_max": 5.0,
+    "alpha_min": 1.0, "alpha_max": 15.0,
     "n_trials": 100
   }'
 ```
@@ -114,8 +114,6 @@ dldml/
 │       ├── dld_optimizer.py     # Optimization engine
 │       └── optimization_model.py # ML model interface
 ├── config/                       # Configuration files
-├── models/
-│   └── trained_model.joblib     # XGBoost surrogate model
 ├── tests/
 │   └── test_optimizer.py        # Test suite
 ├── docker-compose.yml            # Docker orchestration
@@ -132,7 +130,6 @@ dldml/
 | N_p | α (alpha) | Row shift angle | Continuous (degrees) |
 | DI | DI | Deformation index | [0-1] |
 
-**Note:** The paper uses integer periodicity N_p while the code uses continuous angle α (degrees). Both represent row shift in the DLD array; the continuous representation enables finer optimization granularity.
 
 ## Built With
 
@@ -159,16 +156,17 @@ This tool implements the optimization framework from:
 
 **Physics-Guided Surrogate Modeling for Machine Learning–Driven DLD Design Optimization**  
 Khayrul Islam, Mehedi Hasan, Yaling Liu  
-*Submitted to Journal of the American Chemical Society*, 2025
+*Submitted to Digital Discovery (Royal Society of Chemistry)*, 2026
 
 If you use this tool in your research, please cite:
 
 ```bibtex
 @article{islam2025dld,
-  title={Physics-Guided Surrogate Modeling for Machine Learning–Driven DLD Design Optimization},
+  title={Physics-Guided Surrogate Modeling for Machine Learning--Driven DLD Design Optimization},
   author={Islam, Khayrul and Hasan, Mehedi and Liu, Yaling},
-  journal={Journal of the American Chemical Society},
-  year={2025},
+  journal={Digital Discovery},
+  publisher={Royal Society of Chemistry},
+  year={2026},
   note={Submitted}
 }
 ```
@@ -183,7 +181,7 @@ Project Link: [https://github.com/Khayrulbuet13/dldml](https://github.com/Khayru
 
 This research was conducted at:
 - Department of Mechanical Engineering, Lehigh University
-- Computational Engineering Department, Lawrence Livermore National Laboratory
+- Bangladesh University of Engineering and Technology (BUET)
 - Precision Medicine Translational Research Center, West China Hospital, Sichuan University
 
 ---

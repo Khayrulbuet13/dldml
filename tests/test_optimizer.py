@@ -94,7 +94,7 @@ class TestDLDOptimizer:
         assert any("DI1 must be between 0 and 1" in error for error in errors)
     
     def test_physical_constraint_gap_larger_than_radius(self, optimizer):
-        """Test that Pg > Pr constraint is validated."""
+        """Test that Pg > max(R1,R2)+0.5 cell-radius constraint is validated."""
         invalid_params = OptimizationParameters(
             DI1=0.5,
             DI2=0.8,
@@ -102,7 +102,7 @@ class TestDLDOptimizer:
             R2=7.5,
             Pr_min=4.0,
             Pr_max=12.0,
-            Pg_min=5.0,  # Pg_min too small!
+            Pg_min=5.0,  # Too small: need > max(R1,R2)+0.5 = 8.0 μm
             Pg_max=10.0,
             alpha_min=1.0,
             alpha_max=5.0,

@@ -126,8 +126,8 @@ async def get_default_parameters():
         "Pr_max": 10.0, # Pillar radius max (μm)
         "Pg_min": 12.0, # Gap min (μm) - must be > Pr_max
         "Pg_max": 22.0, # Gap max (μm)
-        "alpha_min": 1.0,  # Row shift angle min (degrees)
-        "alpha_max": 5.0,  # Row shift angle max (degrees)
+        "alpha_min": 1.0,   # Row shift angle min (degrees)
+        "alpha_max": 15.0,  # Row shift angle max (degrees); trained envelope N_p∈{4..12} → α∈[4.76°,14.04°]
         "n_trials": 100,
         "n_startup_trials": 15,
         "random_state": 42
