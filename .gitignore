@@ -32,6 +32,8 @@ ssl/
 # Test files
 test_request.json
 test_*.json
+backups/
+DEPLOYMENT.md
 
 # Temporary files
 *.tmp
